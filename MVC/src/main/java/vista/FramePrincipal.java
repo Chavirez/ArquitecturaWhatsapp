@@ -55,6 +55,7 @@ public class FramePrincipal extends javax.swing.JFrame {
 
         jButton1 = new javax.swing.JButton();
         pnlChat = new javax.swing.JScrollPane();
+        lblAgregar = new javax.swing.JLabel();
         panelEnviarMensaje = new vista.panelEnviarMensaje();
         lblFondo = new javax.swing.JLabel();
 
@@ -68,8 +69,16 @@ public class FramePrincipal extends javax.swing.JFrame {
                 jButton1ActionPerformed(evt);
             }
         });
-        getContentPane().add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 40, -1, -1));
+        getContentPane().add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 90, -1, -1));
         getContentPane().add(pnlChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 122, 470, 540));
+
+        lblAgregar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/BotonAgregar.png"))); // NOI18N
+        lblAgregar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblAgregarMouseClicked(evt);
+            }
+        });
+        getContentPane().add(lblAgregar, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 700, -1, -1));
         getContentPane().add(panelEnviarMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 680, -1, -1));
 
         lblFondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/FondoPrincipal.png"))); // NOI18N
@@ -78,77 +87,38 @@ public class FramePrincipal extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    
- 
-    
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-     
-        
-//Mensaje mns = new Mensaje("Pruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebarueba", LocalDateTime.now(), null);
-Mensaje mns = new Mensaje("Prueba", LocalDateTime.now(), 0);
 
-    // PARA MENSAJE PROPIO (Derecha)
-    PanelMensajePropio propia = new PanelMensajePropio(mns);
-    Box filaPropia = Box.createHorizontalBox();
-    filaPropia.setMaximumSize(new Dimension(460, propia.getPreferredSize().height));
-    filaPropia.add(Box.createHorizontalGlue()); // Empuja hacia la derecha
-    filaPropia.add(propia);
-    contenedorMensajes.add(filaPropia);
+        Mensaje mns = new Mensaje("Prueba", LocalDateTime.now(), 0);
 
-    // Espaciado
+        PanelMensajePropio propia = new PanelMensajePropio(mns);
+        Box filaPropia = Box.createHorizontalBox();
+        filaPropia.setMaximumSize(new Dimension(460, propia.getPreferredSize().height));
+        filaPropia.add(Box.createHorizontalGlue()); // Empuja hacia la derecha
+        filaPropia.add(propia);
+        contenedorMensajes.add(filaPropia);
 
-    // PARA MENSAJE AJENO (Izquierda)
-    PanelMensajeAjeno ajena = new PanelMensajeAjeno(mns);
-    Box filaAjena = Box.createHorizontalBox();
-    filaAjena.add(ajena);
-    filaAjena.add(Box.createHorizontalGlue()); 
-    contenedorMensajes.add(filaAjena);
+        PanelMensajeAjeno ajena = new PanelMensajeAjeno(mns);
+        Box filaAjena = Box.createHorizontalBox();
+        filaAjena.add(ajena);
+        filaAjena.add(Box.createHorizontalGlue());
+        contenedorMensajes.add(filaAjena);
 
-    // Refrescar y Scroll
-    contenedorMensajes.revalidate();
-    contenedorMensajes.repaint();
-    javax.swing.SwingUtilities.invokeLater(() -> {
-        pnlChat.getVerticalScrollBar().setValue(pnlChat.getVerticalScrollBar().getMaximum());
-    });
+        contenedorMensajes.revalidate();
+        contenedorMensajes.repaint();
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            pnlChat.getVerticalScrollBar().setValue(pnlChat.getVerticalScrollBar().getMaximum());
+        });
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FramePrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FramePrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FramePrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FramePrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void lblAgregarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblAgregarMouseClicked
+        
+    }//GEN-LAST:event_lblAgregarMouseClicked
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FramePrincipal().setVisible(true);
-            }
-        });
-    }
-
+ 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel lblAgregar;
     private javax.swing.JLabel lblFondo;
     private vista.panelEnviarMensaje panelEnviarMensaje;
     private javax.swing.JScrollPane pnlChat;
