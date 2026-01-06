@@ -3,11 +3,11 @@ package Eventos;
 import java.util.List;
 import DTOs.UsuarioDTO;
 
-public class EnviarUsuarios {
+public class EventoEnviarUsuarios {
 
     private final List<UsuarioDTO> usuarios;
 
-    public EnviarUsuarios(List<UsuarioDTO> usuarios) {
+    public EventoEnviarUsuarios(List<UsuarioDTO> usuarios) {
         this.usuarios = usuarios;
     }
 

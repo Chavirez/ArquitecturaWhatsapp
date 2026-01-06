@@ -1,6 +1,7 @@
 package receptor;
 
 import Eventos.EventoCrearChatNuevo;
+import Eventos.EventoEnviarUsuarios;
 import Eventos.EventoMensajeEnChat;
 import Interfaz.IBusDeEventos;
 import com.google.gson.Gson;
@@ -38,12 +39,12 @@ public class Receptor implements Runnable {
                     if (jsonObject.has("mensajeAEnviar")) {
                         EventoMensajeEnChat evento = gson.fromJson(jsonObject, EventoMensajeEnChat.class);
                         bus.publicar(evento);
-                        System.out.println("[RECEPTOR] Mensaje recibido y publicado.");
-
                     } else if (jsonObject.has("chatNuevo")) {
                         EventoCrearChatNuevo evento = gson.fromJson(jsonObject, EventoCrearChatNuevo.class);
                         bus.publicar(evento);
-                        System.out.println("[RECEPTOR] Solicitud de nuevo chat recibida.");
+                    } else if (jsonObject.has("usuarios")) {
+                        EventoEnviarUsuarios evento = gson.fromJson(jsonObject, EventoEnviarUsuarios.class);
+                        bus.publicar(evento);
                     } else {
                         System.err.println("[RECEPTOR] JSON desconocido: " + cadenaJson);
                     }
