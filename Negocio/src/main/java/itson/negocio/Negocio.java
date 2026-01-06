@@ -18,7 +18,7 @@ public class Negocio {
     private IBusDeEventos bus;
     private List<INegocioListener> listeners;
     
-    private List<Chat> memoriaChats; 
+    public List<Chat> memoriaChats; 
     private List<Usuario> memoriaUsuarios; 
 
     public Negocio(IBusDeEventos bus) {

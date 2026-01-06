@@ -18,7 +18,7 @@ public class panelEnviarMensaje extends javax.swing.JPanel {
     /**
      * Creates new form panelEnviarMensaje
      */
-    public panelEnviarMensaje() {
+    public panelEnviarMensaje(  ) {
         initComponents();
         this.setOpaque(false);
         lblEnviar.setCursor(new Cursor(Cursor.HAND_CURSOR));
