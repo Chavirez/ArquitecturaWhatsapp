@@ -26,6 +26,9 @@ public class Controlador {
     public void abrirFrameLogin(){
     
         FrameLogIn frm = new FrameLogIn(this);
+        
+        modelo.agregarListenerLogin(frm);
+        
         frm.setVisible(true);
         
     }

@@ -46,7 +46,7 @@ public class FrameLogIn extends javax.swing.JFrame implements ObservadorLogin{
     public void actualizar(LoginRespuestaDTO respuesta){
         
         this.respuesta = respuesta;
-        
+        System.out.println("Sipasa");
     }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

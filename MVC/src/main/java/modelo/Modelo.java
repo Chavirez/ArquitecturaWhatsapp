@@ -1,6 +1,7 @@
 package modelo;
 
 import DTOs.LoginPedidoDTO;
+import DTOs.LoginRespuestaDTO;
 import DTOs.MensajeEnChatDTO;
 import DTOs.UsuarioDTO;
 import Objetos.Chat;
@@ -22,7 +23,6 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     private Usuario usuarioLocal;
     private Chat chatActual;
-    private List<MensajeEnChatDTO> historialMensajes;
     
     private List<ObservadorChat> chat = new ArrayList<>();
     private List<ObservadorLogin> log = new ArrayList<>();
@@ -30,7 +30,6 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     public Modelo(Negocio negocio) {
         this.negocio = negocio;
-        this.historialMensajes = new ArrayList<>();
         
     }
     
@@ -76,11 +75,12 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     
     @Override
-    public void notificarLog(){
-        
-        
-        
-    }
+        public void notificarLogin(LoginRespuestaDTO respuesta) {
+
+            for (ObservadorLogin obs : log) {
+                obs.actualizar(respuesta);
+            }
+        }
 
         
     
@@ -90,8 +90,9 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     }
     
     @Override
-    public void recibirLogin(Usuario usuario) {
-        setUsuarioLocal(usuario);
+    public void recibirLogin(LoginRespuestaDTO dto) {
+
+        setUsuarioLocal(new Usuario(dto.getUsuarioLogueado().getId(), dto.getUsuarioLogueado().getNombre(), dto.getUsuarioLogueado().getPassword()));
     }
     @Override
     public void recibirUsuarios(List<Usuario> usuarios) {

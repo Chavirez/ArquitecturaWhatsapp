@@ -4,12 +4,14 @@
  */
 package observadores;
 
+import DTOs.LoginRespuestaDTO;
+
 /**
  *
  * @author santi
  */
 public interface ObservadoLogin {
     
-    public void notificarLog();
+    public void notificarLogin(LoginRespuestaDTO respuesta) ;
     
 }
