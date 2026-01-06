@@ -9,7 +9,7 @@ public class BusDeEventos implements IBusDeEventos{
     private static BusDeEventos instancia;
     private final List<Consumer<Object>> suscriptores = new ArrayList<>();
 
-    private BusDeEventos() {}
+    public BusDeEventos() {}
 
     @Override
     public BusDeEventos getInstancia() {
