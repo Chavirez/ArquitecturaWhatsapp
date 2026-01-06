@@ -9,6 +9,7 @@ import java.util.List;
 import modelo.Modelo;
 import observadores.ObservadorLogin;
 import vista.FrameLogIn;
+import vista.FramePrincipal;
 
 /**
  *
@@ -17,7 +18,6 @@ import vista.FrameLogIn;
 public class Controlador {
     
     private Modelo modelo;
-    private FrameLogIn frmLogIn;
 
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
@@ -29,6 +29,14 @@ public class Controlador {
         frm.setVisible(true);
         
     }
+    
+    public void abrirFramePrincipal(){
+    
+        FramePrincipal frm = new FramePrincipal(this);
+        frm.setVisible(true);
+        
+    }
+ 
     
     public void intentarLogin(String usuario, String pass) {
 

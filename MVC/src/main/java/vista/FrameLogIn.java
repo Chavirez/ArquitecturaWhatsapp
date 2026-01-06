@@ -4,6 +4,7 @@
  */
 package vista;
 
+import DTOs.LoginRespuestaDTO;
 import java.awt.Color;
 import java.awt.Cursor;
 import javax.swing.JOptionPane;
@@ -18,6 +19,7 @@ import observadores.ObservadorLogin;
 public class FrameLogIn extends javax.swing.JFrame implements ObservadorLogin{
 
     private Controlador controlador;
+    private LoginRespuestaDTO respuesta;
     
     public FrameLogIn(Controlador controlador) {
         
@@ -41,8 +43,10 @@ public class FrameLogIn extends javax.swing.JFrame implements ObservadorLogin{
     }
     
     @Override
-    public void actualizar(){
-    
+    public void actualizar(LoginRespuestaDTO respuesta){
+        
+        this.respuesta = respuesta;
+        
     }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -118,6 +122,30 @@ public class FrameLogIn extends javax.swing.JFrame implements ObservadorLogin{
         }
         
         controlador.intentarLogin(usuario, pass);
+        
+        if(respuesta == null){
+        
+            JOptionPane.showMessageDialog(this, 
+            "Error al iniciar sesión", 
+            "Error", 
+            JOptionPane.ERROR_MESSAGE);
+            return;
+            
+        }
+        
+        if(!respuesta.isExito()){
+        
+            JOptionPane.showMessageDialog(this, 
+            respuesta.getMensaje(), 
+            "Advertencia", 
+            JOptionPane.WARNING_MESSAGE);
+            return;
+            
+        }
+        
+        controlador.abrirFramePrincipal();
+        this.dispose();
+        
     }//GEN-LAST:event_lblBtnLogMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

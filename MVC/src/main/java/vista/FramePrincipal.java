@@ -4,11 +4,17 @@
  */
 package vista;
 
+import Objetos.Chat;
 import Objetos.Mensaje;
+import controlador.Controlador;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 
 /**
@@ -17,16 +23,61 @@ import javax.swing.UIManager;
  */
 public class FramePrincipal extends javax.swing.JFrame {
     
+    private Controlador controlador;
+    
     private javax.swing.JPanel contenedorMensajes;
+    private javax.swing.JPanel contenedorContactos;
+    
     /**
      * Creates new form FramePrincipal
      */
-    public FramePrincipal() {
+    public FramePrincipal(Controlador controlador) {
+        this.controlador = controlador;
         initComponents();
         configurarChat();
+        configurarContactos();
 
     }
+    
+    private void configurarContactos() {
+            contenedorContactos = new JPanel();
+            contenedorContactos.setLayout(new BoxLayout(contenedorContactos, BoxLayout.Y_AXIS));
+            contenedorContactos.setOpaque(false); 
 
+
+            pnlContactos.setViewportView(contenedorContactos);
+            pnlContactos.getViewport().setOpaque(false);
+            pnlContactos.setOpaque(false);
+            pnlContactos.setBorder(null);
+
+            pnlContactos.getVerticalScrollBar().setUI(new EstiloScrollBar());
+            pnlContactos.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+            pnlContactos.getVerticalScrollBar().setUnitIncrement(16);
+
+            pnlContactos.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        }
+    
+        public void actualizarListaChats(List<Chat> listaChats) {
+                contenedorContactos.removeAll(); // Limpiar lista anterior
+
+                for (Chat chat : listaChats) {
+                    // Crear el panel individual para cada chat
+                    PanelChatsDisponibles itemChat = new PanelChatsDisponibles(chat);
+
+                    // Ajustar tamaño máximo para que no se estire de más
+                    itemChat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70)); // Altura fija aprox
+                    itemChat.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+                    // Agregar al contenedor
+                    contenedorContactos.add(itemChat);
+
+                    // Espacio entre chats (opcional)
+                    contenedorContactos.add(Box.createRigidArea(new Dimension(0, 5)));
+                }
+
+                contenedorContactos.revalidate();
+                contenedorContactos.repaint();
+            }
     private void configurarChat() {
         contenedorMensajes = new javax.swing.JPanel();
 
@@ -54,6 +105,7 @@ public class FramePrincipal extends javax.swing.JFrame {
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
+        pnlContactos = new javax.swing.JScrollPane();
         pnlChat = new javax.swing.JScrollPane();
         lblAgregar = new javax.swing.JLabel();
         panelEnviarMensaje = new vista.panelEnviarMensaje();
@@ -70,6 +122,7 @@ public class FramePrincipal extends javax.swing.JFrame {
             }
         });
         getContentPane().add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 90, -1, -1));
+        getContentPane().add(pnlContactos, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 120, 260, 570));
         getContentPane().add(pnlChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 122, 470, 540));
 
         lblAgregar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/BotonAgregar.png"))); // NOI18N
@@ -122,5 +175,6 @@ public class FramePrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel lblFondo;
     private vista.panelEnviarMensaje panelEnviarMensaje;
     private javax.swing.JScrollPane pnlChat;
+    private javax.swing.JScrollPane pnlContactos;
     // End of variables declaration//GEN-END:variables
 }

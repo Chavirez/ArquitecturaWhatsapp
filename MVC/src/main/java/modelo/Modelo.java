@@ -26,6 +26,7 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     private List<ObservadorChat> chat = new ArrayList<>();
     private List<ObservadorLogin> log = new ArrayList<>();
+    private Consumer<List<Chat>> notificarVistaChats; 
     
     public Modelo(Negocio negocio) {
         this.negocio = negocio;
@@ -41,6 +42,9 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
         this.log.add(listener);
     }
 
+    public void suscribirListaChats(Consumer<List<Chat>> metodoVista) {
+            this.notificarVistaChats = metodoVista;
+        }
     public void enviarMensaje(String texto) {
         if (usuarioLocal == null) return;
 
@@ -96,7 +100,9 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     @Override
     public void recibirChat(List<Chat> chats) {
-        System.out.println("[MODELO] Lista de chats actualizada: " + chats.size());
+        if (notificarVistaChats != null) {
+                    notificarVistaChats.accept(chats);
+                }
     }
 
     
