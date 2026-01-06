@@ -1,70 +1,116 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package itson.negocio;
 
 import DTOs.CrearChatNuevoDTO;
 import DTOs.MensajeEnChatDTO;
-import Eventos.EventoCrearChatNuevo;
-import Eventos.EventoMensajeEnChat;
+import DTOs.UsuarioDTO;
+import Eventos.*;
 import Interfaz.IBusDeEventos;
 import Objetos.Chat;
+import Objetos.Mensaje;
 import Objetos.Usuario;
+import interfaz.INegocioListener;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-/**
- *
- * @author santi
- */
 public class Negocio {
-    private List<Chat> memoriaChats;
-    private List<Usuario> memoriaUsuarios;
+    
     private IBusDeEventos bus;
+    private List<INegocioListener> listeners;
+    
+    private List<Chat> memoriaChats; 
+    private List<Usuario> memoriaUsuarios; 
 
     public Negocio(IBusDeEventos bus) {
         this.bus = bus;
+        this.listeners = new ArrayList<>();
         this.memoriaChats = new ArrayList<>();
         this.memoriaUsuarios = new ArrayList<>();
-        configurarSuscripciones();
+        configurarSuscripcionesDelBus();
     }
 
-    private void configurarSuscripciones() {
-        
-        bus.getInstancia().suscribir(evento -> {
+    private void configurarSuscripcionesDelBus() {
+        bus.suscribir(evento -> {
             if (evento instanceof EventoMensajeEnChat eventoMensajeEnChat) {
-                procesarMensajeRecibido(eventoMensajeEnChat);
-            } else if (evento instanceof EventoCrearChatNuevo eventoCrearChatNuevo) {
-                procesarNuevoChat(eventoCrearChatNuevo);
+                MensajeEnChatDTO dto = eventoMensajeEnChat.getMensaje();
+                
+                for(Chat chat : memoriaChats){
+                
+                    if(chat.getId() == dto.getIdChat()){
+                    
+                        Mensaje mensajeN = new Mensaje(dto.getMensaje(), dto.getFechaMensaje(), dto.getIdUsuario());
+                        chat.getMensajes().add(mensajeN);
+                        
+                    }
+                    
+                }
+                
+                notificarMensaje();
+            }
+            else if (evento instanceof EventoCrearChatNuevo eventoCrearChatNuevo) {
+                CrearChatNuevoDTO dto = eventoCrearChatNuevo.getMensaje();
+                
+                List<Mensaje> mVacio = new ArrayList<>();
+                List<Usuario> usuarios = new ArrayList<>();
+                
+                for(Usuario u : memoriaUsuarios){
+                
+                    if(u.getId() == dto.getIdUsuario1() || u.getId() == dto.getIdUsuario2())
+                        usuarios.add(u);
+                    
+                }
+                
+                Chat chatNuevo = new Chat(memoriaChats.size()+1, mVacio, usuarios);
+                
+                this.memoriaChats.add(chatNuevo);
+                
+                notificarMensaje();
+            }
+            else if (evento instanceof EventoEnviarUsuarios eventoEnviarUsuarios) { 
+                 List<UsuarioDTO> usuarios = eventoEnviarUsuarios.getUsuarios();
+                 
+                 List<Usuario> usuariosAG = new ArrayList<>();
+                 
+                 for(UsuarioDTO u : usuarios){
+                 
+                     Usuario uN = new Usuario(u.getId(), u.getNombre(), u.getPassword());
+                     usuariosAG.add(uN);
+                     
+                 }
+                 
+                 this.memoriaUsuarios = usuariosAG;
+                 
+                 notificarUsuarios();
             }
         });
     }
 
-    private void procesarMensajeRecibido(EventoMensajeEnChat evento) {
-        MensajeEnChatDTO dto = evento.getMensaje();
+    
+    public void enviarMensaje(MensajeEnChatDTO dto) {
 
-        // 2. Almacenamiento en memoria segmentado por Chat ID 
-//        memoriaMensajes.add
-        
-        System.out.println("Negocio: Mensaje validado y guardado en memoria para el chat " + dto.getIdChat());
-        
-        // Aquí se podría publicar un evento de "REFRESCO_UI" si fuera necesario
+        bus.publicar(new EventoMensajeEnChat(dto));
+    }
+    
+    public void crearChat(CrearChatNuevoDTO dto) {
+
+        bus.publicar(new EventoCrearChatNuevo(dto));
+    }
+    
+    public void agregarListener(INegocioListener listener) {
+        this.listeners.add(listener);
     }
 
-    private void procesarNuevoChat(EventoCrearChatNuevo evento) {
-        CrearChatNuevoDTO dto = evento.getMensaje();
-        // Lógica para inicializar una nueva lista de mensajes en memoria
-        List<Usuario> usuarios = new ArrayList<>();
-//        usuarios.add(dto.getIdUsuario1());
-//        usuarios.add(dto.getIdUsuario2());
-//        
-//        Chat nuevoChat = new Chat(mensajes, usuarios)
-//        memoriaMensajes.putIfAbsent(dto.hashCode(), new ArrayList<>());
-        System.out.println("Negocio: Nuevo chat registrado entre usuarios " + dto.getIdUsuario1() + " y " + dto.getIdUsuario2());
+    private void notificarMensaje() {
+        for (INegocioListener listener : listeners) {
+            listener.recibirChat(memoriaChats);
+        }
     }
+    
+    private void notificarUsuarios() {
+        for (INegocioListener listener : listeners) {
+            listener.recibirUsuarios(memoriaUsuarios);
+        }
+    }
+    
 
- 
 }

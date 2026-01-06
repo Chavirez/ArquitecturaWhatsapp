@@ -13,13 +13,15 @@ import java.util.List;
  */
 public class Chat implements Serializable {
     
+    private int id;
     private List<Mensaje> mensajes;
     private List<Usuario> usuarios;
 
     public Chat() {
     }
 
-    public Chat(List<Mensaje> mensajes, List<Usuario> usuarios) {
+    public Chat(int id, List<Mensaje> mensajes, List<Usuario> usuarios) {
+        this.id = id;
         this.mensajes = mensajes;
         this.usuarios = usuarios;
     }
@@ -40,10 +42,20 @@ public class Chat implements Serializable {
         this.usuarios = usuarios;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
-        return "Chat{" + "mensajes=" + mensajes + ", usuarios=" + usuarios + '}';
+        return "Chat{" + "id=" + id + ", mensajes=" + mensajes + ", usuarios=" + usuarios + '}';
     }
+
+
     
     
     

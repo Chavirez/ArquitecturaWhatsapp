@@ -6,6 +6,7 @@ package vista;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 /**
@@ -58,11 +59,43 @@ public class panelEnviarMensaje extends javax.swing.JPanel {
 
         fldMensaje.setFont(new java.awt.Font("Nirmala Text", 0, 18)); // NOI18N
         add(fldMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 360, 60));
+
+        lblEnviar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblEnviarMouseClicked(evt);
+            }
+        });
         add(lblEnviar, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 20, 70, 60));
 
         lblFondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/BoxMensaje.png"))); // NOI18N
         add(lblFondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 470, -1));
     }// </editor-fold>//GEN-END:initComponents
+
+    private void lblEnviarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblEnviarMouseClicked
+    String texto = fldMensaje.getText();
+
+        if (texto == null || texto.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "No se puede enviar un mensaje vacío", 
+                "Advertencia", 
+                JOptionPane.WARNING_MESSAGE);
+            fldMensaje.requestFocus();
+            return;
+        }
+
+        if (texto.length() > 50) {
+            JOptionPane.showMessageDialog(this, 
+                "El mensaje es demasiado largo (Máx " + 50 + " caracteres).", 
+                "Advertencia", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+            
+            fldMensaje.setText("");
+            fldMensaje.requestFocus(); 
+        
+    }//GEN-LAST:event_lblEnviarMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

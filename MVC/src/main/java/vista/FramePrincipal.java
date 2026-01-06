@@ -85,7 +85,7 @@ public class FramePrincipal extends javax.swing.JFrame {
      
         
 //Mensaje mns = new Mensaje("Pruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebarueba", LocalDateTime.now(), null);
-Mensaje mns = new Mensaje("Prueba", LocalDateTime.now(), null);
+Mensaje mns = new Mensaje("Prueba", LocalDateTime.now(), 0);
 
     // PARA MENSAJE PROPIO (Derecha)
     PanelMensajePropio propia = new PanelMensajePropio(mns);

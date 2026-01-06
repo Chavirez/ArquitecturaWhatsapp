@@ -15,15 +15,15 @@ public class Mensaje implements Serializable {
     
     private String mensaje;
     private LocalDateTime fechaEnviado;
-    private Usuario usuario;
+    private int idUsuario;
 
     public Mensaje() {
     }
 
-    public Mensaje(String mensaje, LocalDateTime fechaEnviado, Usuario usuario) {
+    public Mensaje(String mensaje, LocalDateTime fechaEnviado, int idUsuario) {
         this.mensaje = mensaje;
         this.fechaEnviado = fechaEnviado;
-        this.usuario = usuario;
+        this.idUsuario = idUsuario;
     }
 
     public String getMensaje() {
@@ -42,19 +42,20 @@ public class Mensaje implements Serializable {
         this.fechaEnviado = fechaEnviado;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
+    public int getIdUsuario() {
+        return idUsuario;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     @Override
     public String toString() {
-        return "Mensaje{" + "mensaje=" + mensaje + ", fechaEnviado=" + fechaEnviado + ", usuario=" + usuario + '}';
+        return "Mensaje{" + "mensaje=" + mensaje + ", fechaEnviado=" + fechaEnviado + ", idUsuario=" + idUsuario + '}';
     }
-    
+
+
     
     
 }
