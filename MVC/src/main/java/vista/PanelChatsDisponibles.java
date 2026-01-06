@@ -6,6 +6,11 @@ package vista;
 
 import Objetos.Chat;
 import Objetos.Usuario;
+import controlador.Controlador;
+import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.function.Consumer;
 
 /**
  *
@@ -14,26 +19,59 @@ import Objetos.Usuario;
 public class PanelChatsDisponibles extends javax.swing.JPanel {
 
     private Chat chat;
-    private Usuario uLogueado;
-    
-    public PanelChatsDisponibles(Chat chat, Usuario uLogueado) {
-        this.chat = chat;
-        this.uLogueado = uLogueado;
+    private Controlador controlador;
+    private Consumer<Chat> alHacerClic; // Variable para guardar la acción
+    private Usuario usuario;
+
+    // Modificamos el constructor para recibir la acción 'alHacerClic'
+    public PanelChatsDisponibles(Chat chat, Controlador controlador, Consumer<Chat> alHacerClic, Usuario uLogueado) {
         initComponents();
-        configurarTexto();
+        this.chat = chat;
+        this.controlador = controlador;
+        this.alHacerClic = alHacerClic; // Guardamos la acción
+        this.usuario = uLogueado;
         
+        configurarTexto();
+        configurarEventos(); // Método nuevo
+    }
+    
+    private void configurarEventos() {
+        // Agregamos el evento de clic a todo el panel
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Cambiar color para efecto visual de selección
+                setBackground(new Color(230, 230, 230)); 
+                
+                // Ejecutar la acción que nos pasó el FramePrincipal
+                if (alHacerClic != null) {
+                    alHacerClic.accept(chat);
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                 // Regresar al color original al salir (opcional)
+                 setBackground(new Color(255, 255, 255));
+            }
+        });
     }
 
-
     public void configurarTexto(){
-    
-        
-        if(chat.getUsuarios().getFirst().getId() == uLogueado.getId())
-            lblNombreUsuario.setText(chat.getUsuarios().get(1).getUsuario());
-        if(chat.getUsuarios().getFirst().getId() != uLogueado.getId())
-            lblNombreUsuario.setText(chat.getUsuarios().get(0).getUsuario());
-        
-        
+    String nombreMostrar = "Chat " + chat.getId(); // Valor por defecto
+
+            if (chat.getUsuarios() != null) {
+                for (Usuario u : chat.getUsuarios()) {
+                    // Si el usuario analizado NO soy yo, entonces es mi contacto
+                    if (u.getId() != this.usuario.getId()) {
+                        nombreMostrar = u.getUsuario(); // Obtenemos su nombre real
+                        break; // En chats de 2 personas, con encontrar uno basta
+                    }
+                }
+            }
+
+            // Asignamos el nombre al label (Funciona tenga mensajes o no)
+            lblNombreUsuario.setText(nombreMostrar);
     }
 
     @SuppressWarnings("unchecked")

@@ -4,6 +4,8 @@
  */
 package controlador;
 
+import DTOs.CrearChatNuevoDTO;
+import Objetos.Usuario;
 import java.util.ArrayList;
 import java.util.List;
 import modelo.Modelo;
@@ -44,7 +46,24 @@ public class Controlador {
         modelo.notificarChat();
 
     }
- 
+    
+    public List<Usuario> getUsuariosDisponiblesParaChat(){
+    
+        return modelo.getUsuariosDisponiblesParaChat();
+        
+    }
+    
+    public void crearChatCon(Usuario usuarioDestino) {
+        if (usuarioDestino == null) return;
+
+        // Creamos el DTO con los dos IDs
+        CrearChatNuevoDTO dto = new CrearChatNuevoDTO(modelo.getUsuarioLocal(), usuarioDestino);
+
+        // Publicamos el evento al bus (que viajará al servidor)
+//        bus.publicar(new EventoCrearChatNuevo(dto));
+
+        System.out.println("Solicitando chat con: " + usuarioDestino.getUsuario());
+    }
     
     public void intentarLogin(String usuario, String pass) {
 

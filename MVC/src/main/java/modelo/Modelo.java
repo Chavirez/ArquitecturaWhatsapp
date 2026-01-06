@@ -23,6 +23,7 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     private Usuario usuarioLocal;
     private List<Chat> chats;
+    private List<Usuario> usuarios;
     
     private List<ObservadorChat> chat = new ArrayList<>();
     private List<ObservadorLogin> log = new ArrayList<>();
@@ -102,7 +103,7 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     }
     @Override
     public void recibirUsuarios(List<Usuario> usuarios) {
-        System.out.println("[MODELO] Lista de usuarios actualizada: " + usuarios.size());
+        this.usuarios = usuarios;
     }
     
     @Override
@@ -112,7 +113,19 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
         notificarChat();
     }
 
-    
+    public List<Usuario> getUsuariosDisponiblesParaChat() {
+        List<Usuario> disponibles = new ArrayList<>();
+
+        if (usuarios != null && usuarioLocal != null) {
+            for (Usuario u : usuarios) {
+                // Agregamos a todos MENOS a mi mismo
+                if (u.getId() != usuarioLocal.getId()) {
+                    disponibles.add(u);
+                }
+            }
+        }
+        return disponibles;
+    }
     
     public void setUsuarioLocal(Usuario usuario) {
         this.usuarioLocal = usuario;

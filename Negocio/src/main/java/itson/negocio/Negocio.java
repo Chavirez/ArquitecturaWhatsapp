@@ -72,7 +72,6 @@ public class Negocio {
             else if (evento instanceof EventoEnviarUsuarios eventoEnviarUsuarios) { 
                  // ... lógica existente de usuarios ...
                  List<UsuarioDTO> usuarios = eventoEnviarUsuarios.getUsuarios();
-                 System.out.println(usuarios.toString());
                  List<Usuario> usuariosAG = new ArrayList<>();
                  for(UsuarioDTO u : usuarios){
                      Usuario uN = new Usuario(u.getId(), u.getNombre(), u.getPassword());
@@ -208,4 +207,6 @@ public class Negocio {
             listener.recibirLogin(dto);
         }
     }
+    
+    
 }

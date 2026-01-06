@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
@@ -28,6 +29,8 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     
     private Controlador controlador;
     private Usuario usuarioLogueado;
+    private Chat chatSeleccionadoActual; 
+    private Modelo modelo;
     
     private javax.swing.JPanel contenedorMensajes;
     private javax.swing.JPanel contenedorContactos;
@@ -47,12 +50,58 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     @Override
     public void actualizar(Modelo modelo){
         
+        this.modelo = modelo;
         this.usuarioLogueado = modelo.getUsuarioLocal();
         actualizarListaChats(modelo.getChat());
         this.revalidate();
         this.repaint();
         
     }
+    
+    private void cargarMensajesDelChat(Chat chat) {
+        this.chatSeleccionadoActual = chat;
+
+        // 1. Limpiamos el CONTENEDOR INTERNO, no el ScrollPane
+        contenedorMensajes.removeAll();
+
+        // El layout ya se definió en configurarChat(), pero no hace daño asegurarlo
+        // contenedorMensajes.setLayout(new BoxLayout(contenedorMensajes, BoxLayout.Y_AXIS));
+
+        int idMiUsuario = usuarioLogueado.getId();
+
+        // 2. Iteramos los mensajes
+        for (Mensaje m : chat.getMensajes()) {
+            if (m.getUsuario().getId() == idMiUsuario) { // Nota: Revisa si es m.getIdUsuario() o m.getUsuario().getId()
+                PanelMensajePropio panelMio = new PanelMensajePropio(m);
+
+                // Alineación a la derecha para mensajes propios
+                panelMio.setAlignmentX(Component.RIGHT_ALIGNMENT); 
+
+                contenedorMensajes.add(panelMio);
+                contenedorMensajes.add(Box.createRigidArea(new Dimension(0, 5))); // Espacio entre mensajes
+
+            } else {
+                PanelMensajeAjeno panelAjeno = new PanelMensajeAjeno(m);
+
+                // Alineación a la izquierda para mensajes ajenos
+                panelAjeno.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+                contenedorMensajes.add(panelAjeno);
+                contenedorMensajes.add(Box.createRigidArea(new Dimension(0, 5)));
+            }
+        }
+
+        // 3. Importante: Agregar "Pegamento" al final si quieres que empiecen desde arriba
+        // Opcional: contenedorMensajes.add(Box.createVerticalGlue());
+
+        // 4. Refrescar visualmente
+        contenedorMensajes.revalidate();
+        contenedorMensajes.repaint();
+
+        // 5. Bajar el scroll automáticamente al último mensaje
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            pnlChat.getVerticalScrollBar().setValue(pnlChat.getVerticalScrollBar().getMaximum());
+    });}
     private void configurarContactos() {
             contenedorContactos = new JPanel();
             contenedorContactos.setLayout(new BoxLayout(contenedorContactos, BoxLayout.Y_AXIS));
@@ -73,35 +122,47 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     
 
     
-        public void actualizarListaChats(List<Chat> listaChats) {
-                contenedorContactos.removeAll(); 
-                
-                System.out.println(usuarioLogueado.toString());
-                if(listaChats==null || listaChats.isEmpty()){
-                
-                    System.out.println("no hay chats iniciales");
-                    return;
-                
+    public void actualizarListaChats(List<Chat> listaChats) {
+        contenedorContactos.removeAll(); 
+
+        if(listaChats == null || listaChats.isEmpty()){
+            System.out.println("No hay chats para mostrar");
+            // Refrescamos para que se limpie la pantalla si no hay chats
+            contenedorContactos.revalidate();
+            contenedorContactos.repaint();
+            return;
+        }
+
+        // Obtenemos el ID del usuario local una sola vez para optimizar
+        int miId = (usuarioLogueado != null) ? usuarioLogueado.getId() : -1;
+
+        for (Chat chat : listaChats) {
+            // Validación: Solo mostrar chats donde estoy yo
+            boolean soyParteDelChat = false;
+            for (Usuario u : chat.getUsuarios()) {
+                if (u.getId() == miId) {
+                    soyParteDelChat = true;
+                    break;
                 }
-                
-                for (Chat chat : listaChats) {
-                    
-                    if(chat.getUsuarios().getFirst().getId() != usuarioLogueado.getId() && chat.getUsuarios().getLast().getId() != usuarioLogueado.getId())
-                        continue;
-                    
-                    PanelChatsDisponibles itemChat = new PanelChatsDisponibles(chat, usuarioLogueado);
-
-                    itemChat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70)); // Altura fija aprox
-                    itemChat.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-                    contenedorContactos.add(itemChat);
-
-                    contenedorContactos.add(Box.createRigidArea(new Dimension(0, 5)));
-                }
-
-                contenedorContactos.revalidate();
-                contenedorContactos.repaint();
             }
+
+            if (!soyParteDelChat) continue; 
+
+            // --- CAMBIO CLAVE AQUÍ ---
+            // Pasamos el chat, el usuario, Y LA ACCIÓN (this::cargarMensajesDelChat)
+            // Nota: Asegúrate que PanelChatsDisponibles tenga este constructor
+            PanelChatsDisponibles itemChat = new PanelChatsDisponibles(chat, controlador, this::cargarMensajesDelChat, usuarioLogueado);
+
+            itemChat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70)); 
+            itemChat.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            contenedorContactos.add(itemChat);
+            contenedorContactos.add(Box.createRigidArea(new Dimension(0, 5)));
+        }
+
+        contenedorContactos.revalidate();
+        contenedorContactos.repaint();
+    }
     private void configurarChat() {
         contenedorMensajes = new javax.swing.JPanel();
 
@@ -130,7 +191,6 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
 
         pnlContactos = new javax.swing.JScrollPane();
         pnlChat = new javax.swing.JScrollPane();
-        jButton1 = new javax.swing.JButton();
         lblAgregar = new javax.swing.JLabel();
         panelEnviarMensaje = new vista.panelEnviarMensaje();
         lblFondo = new javax.swing.JLabel();
@@ -139,15 +199,6 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
         setMinimumSize(new java.awt.Dimension(800, 800));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         getContentPane().add(pnlContactos, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 260, 670));
-
-        jButton1.setText("jButton1");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        pnlChat.setViewportView(jButton1);
-
         getContentPane().add(pnlChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 22, 470, 640));
 
         lblAgregar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/BotonAgregar.png"))); // NOI18N
@@ -165,37 +216,33 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-
-//        Mensaje mns = new Mensaje("Prueba", LocalDateTime.now(), 0);
-//
-//        PanelMensajePropio propia = new PanelMensajePropio(mns);
-//        Box filaPropia = Box.createHorizontalBox();
-//        filaPropia.setMaximumSize(new Dimension(460, propia.getPreferredSize().height));
-//        filaPropia.add(Box.createHorizontalGlue()); // Empuja hacia la derecha
-//        filaPropia.add(propia);
-//        contenedorMensajes.add(filaPropia);
-//
-//        PanelMensajeAjeno ajena = new PanelMensajeAjeno(mns);
-//        Box filaAjena = Box.createHorizontalBox();
-//        filaAjena.add(ajena);
-//        filaAjena.add(Box.createHorizontalGlue());
-//        contenedorMensajes.add(filaAjena);
-//
-//        contenedorMensajes.revalidate();
-//        contenedorMensajes.repaint();
-//        javax.swing.SwingUtilities.invokeLater(() -> {
-//            pnlChat.getVerticalScrollBar().setValue(pnlChat.getVerticalScrollBar().getMaximum());
-//        });
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void lblAgregarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblAgregarMouseClicked
-        
+    List<Usuario> usuarios = controlador.getUsuariosDisponiblesParaChat();
+    
+    if (usuarios.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No hay más usuarios");
+        return;
+    }
+    
+    Usuario[] opciones = new Usuario[usuarios.size()];
+    usuarios.toArray(opciones);
+    
+    Usuario seleccionado = (Usuario) JOptionPane.showInputDialog(
+            this,
+            "Selecciona con quien hablar!",
+            "Nuevo Chat",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            opciones,
+            opciones[0]);
+
+    if (seleccionado != null) {
+        controlador.crearChatCon(seleccionado);
+    }
     }//GEN-LAST:event_lblAgregarMouseClicked
 
  
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel lblAgregar;
     private javax.swing.JLabel lblFondo;
     private vista.panelEnviarMensaje panelEnviarMensaje;
