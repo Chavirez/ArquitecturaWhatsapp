@@ -4,13 +4,14 @@
  */
 package Objetos;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author santi
  */
-public class Mensaje {
+public class Mensaje implements Serializable {
     
     private String mensaje;
     private Date fechaEnviado;

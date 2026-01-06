@@ -4,13 +4,14 @@
  */
 package Objetos;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author santi
  */
-public class Chat {
+public class Chat implements Serializable {
     
     private List<Mensaje> mensajes;
     private List<Usuario> usuarios;

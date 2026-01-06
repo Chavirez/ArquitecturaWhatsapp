@@ -4,11 +4,13 @@
  */
 package Objetos;
 
+import java.io.Serializable;
+
 /**
  *
  * @author santi
  */
-public class Usuario {
+public class Usuario implements Serializable {
     
     private int id;
     private String usuario;
