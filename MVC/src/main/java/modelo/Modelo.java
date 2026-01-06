@@ -80,10 +80,7 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     public void notificarChat(){
         
         System.out.println(negocio.memoriaChats.toString());
-        
-        if (negocio.memoriaChats != null) {
-                recibirChat(negocio.memoriaChats);
-            }
+
         for (ObservadorChat obs : chat) {
             obs.actualizar(this);
         }
@@ -99,6 +96,7 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
                 ));
             }
 
+            
             // 2. IMPORTANTE: Notificar a la Vista (FrameLogIn) para que reaccione
             notificarLogin(dto);
     }
@@ -109,9 +107,9 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     @Override
     public void recibirChat(List<Chat> chats) {
-        if (notificarVistaChats != null) {
-                    notificarVistaChats.accept(chats);
-                }
+        this.chats = chats; 
+
+        notificarChat();
     }
 
     

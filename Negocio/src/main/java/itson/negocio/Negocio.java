@@ -64,9 +64,15 @@ public class Negocio {
                 this.memoriaChats.add(chatNuevo);
                 notificarMensaje();
             }
+            else if (evento instanceof EventoSincronizacion eventoSync) {
+                this.memoriaChats = eventoSync.getChats();
+                System.out.println("Negocio: Chats sincronizados (" + memoriaChats.size() + ")");
+                notificarMensaje(); 
+            }
             else if (evento instanceof EventoEnviarUsuarios eventoEnviarUsuarios) { 
                  // ... lógica existente de usuarios ...
                  List<UsuarioDTO> usuarios = eventoEnviarUsuarios.getUsuarios();
+                 System.out.println(usuarios.toString());
                  List<Usuario> usuariosAG = new ArrayList<>();
                  for(UsuarioDTO u : usuarios){
                      Usuario uN = new Usuario(u.getId(), u.getNombre(), u.getPassword());

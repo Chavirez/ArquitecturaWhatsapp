@@ -12,6 +12,8 @@ import servidor.EstadoServidor;
 import utilidades.LocalDateTimeAdapter;
 import DTOs.UsuarioDTO;
 import Eventos.EventoEnviarUsuarios;
+import Eventos.EventoSincronizacion;
+import Objetos.Chat;
 import Objetos.Usuario;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,50 +58,41 @@ public class ManejadorCliente implements Runnable {
     }
     
     private void sincronizarEstadoActual() {
-            try {
-                Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                        .create();
+        try {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .create();
 
-                EstadoServidor estado = EstadoServidor.getInstancia();
+            EstadoServidor estado = EstadoServidor.getInstancia();
 
-                System.out.println("Sincronizando cliente...");
-
-                // -----------------------------------------------------------
-                // 1. SINCRONIZAR USUARIOS
-                // -----------------------------------------------------------
-                List<Usuario> usuariosEnMemoria = estado.getUsuarios();
-                List<UsuarioDTO> usuariosParaEnviar = new ArrayList<>();
-
-                // Convertimos de Entidad (Dominio) a DTO (Transporte)
-                synchronized (usuariosEnMemoria) { // Sincronizamos para evitar errores si alguien se registra justo ahora
-                    for (Usuario u : usuariosEnMemoria) {
-                        usuariosParaEnviar.add(new UsuarioDTO(u.getId(), u.getUsuario(), u.getContrasenia()));
-                    }
+            // 1. SINCRONIZAR USUARIOS (Esto ya lo tienes y funciona)
+            List<Usuario> usuariosEnMemoria = estado.getUsuarios();
+            List<UsuarioDTO> usuariosParaEnviar = new ArrayList<>();
+            synchronized (usuariosEnMemoria) {
+                for (Usuario u : usuariosEnMemoria) {
+                    usuariosParaEnviar.add(new UsuarioDTO(u.getId(), u.getUsuario(), u.getContrasenia()));
                 }
-
-                // Creamos el evento y lo enviamos (JSON) directamente a ESTE cliente
-                EventoEnviarUsuarios eventoUsuarios = new EventoEnviarUsuarios(usuariosParaEnviar);
-                String jsonUsuarios = gson.toJson(eventoUsuarios);
-                this.escritor.println(jsonUsuarios);
-
-                System.out.println(" > Enviados " + usuariosParaEnviar.size() + " usuarios.");
-
-                // -----------------------------------------------------------
-                // 2. SINCRONIZAR CHATS (Simulación con EventoCrearChatNuevo)
-                // -----------------------------------------------------------
-                // Nota: Como vimos antes, esto solo envía la existencia del chat.
-                // Idealmente deberías crear un EventoChatCompleto para enviar mensajes viejos.
-                /* for (Chat chat : estado.getChats()) {
-                     // Tu lógica de envío de chats aquí...
-                }
-                */
-
-            } catch (Exception e) {
-                System.err.println("Error al sincronizar cliente: " + e.getMessage());
-                e.printStackTrace();
             }
+            EventoEnviarUsuarios eventoUsuarios = new EventoEnviarUsuarios(usuariosParaEnviar);
+            this.escritor.println(gson.toJson(eventoUsuarios));
+
+            // 2. SINCRONIZAR CHATS (Esto es lo que falta)
+            // Obtenemos la lista real de chats del servidor
+            List<Chat> chatsDelServidor = estado.getChats();
+
+            // Empaquetamos la lista en el evento que creaste
+            EventoSincronizacion eventoSync = new EventoSincronizacion(chatsDelServidor);
+
+            // Lo enviamos al cliente
+            String jsonChats = gson.toJson(eventoSync);
+            this.escritor.println(jsonChats);
+
+            System.out.println(" > Sincronizados " + chatsDelServidor.size() + " chats al cliente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
         
     private void cerrarConexion() {
         try {

@@ -5,6 +5,7 @@
 package vista;
 
 import Objetos.Chat;
+import Objetos.Usuario;
 
 /**
  *
@@ -13,45 +14,41 @@ import Objetos.Chat;
 public class PanelChatsDisponibles extends javax.swing.JPanel {
 
     private Chat chat;
+    private Usuario uLogueado;
     
-    public PanelChatsDisponibles(Chat chat) {
+    public PanelChatsDisponibles(Chat chat, Usuario uLogueado) {
         this.chat = chat;
+        this.uLogueado = uLogueado;
         initComponents();
         configurarTexto();
         
     }
 
+
     public void configurarTexto(){
     
-        String mensaje = chat.getMensajes().getLast().getMensaje();
         
-        if (mensaje == null) {
-            mensaje = "Manda el primer mensaje!";
-        }
-        if (mensaje.length() > 15) {
-            mensaje = mensaje.substring(0, 15) + "...";
-        }
-        lblUltimoMensaje.setText(mensaje);
+        if(chat.getUsuarios().getFirst().getId() == uLogueado.getId())
+            lblNombreUsuario.setText(chat.getUsuarios().get(1).getUsuario());
+        if(chat.getUsuarios().getFirst().getId() != uLogueado.getId())
+            lblNombreUsuario.setText(chat.getUsuarios().get(0).getUsuario());
         
         
-        lblNombreUsuario.setText("a");
     }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        lblUltimoMensaje = new javax.swing.JLabel();
         lblNombreUsuario = new javax.swing.JLabel();
         lblIcono = new javax.swing.JLabel();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblUltimoMensaje.setText("MensajeDefault");
-        add(lblUltimoMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 60, -1, -1));
-
+        lblNombreUsuario.setFont(new java.awt.Font("Nirmala Text", 1, 18)); // NOI18N
+        lblNombreUsuario.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblNombreUsuario.setText("Usuario Default");
-        add(lblNombreUsuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 20, -1, -1));
+        add(lblNombreUsuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 16, 170, 70));
 
         lblIcono.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/IconoDefault.png"))); // NOI18N
         add(lblIcono, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, -1, -1));
@@ -61,6 +58,5 @@ public class PanelChatsDisponibles extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblIcono;
     private javax.swing.JLabel lblNombreUsuario;
-    private javax.swing.JLabel lblUltimoMensaje;
     // End of variables declaration//GEN-END:variables
 }

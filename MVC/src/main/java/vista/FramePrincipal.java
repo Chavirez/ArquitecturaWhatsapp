@@ -6,6 +6,7 @@ package vista;
 
 import Objetos.Chat;
 import Objetos.Mensaje;
+import Objetos.Usuario;
 import controlador.Controlador;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -26,6 +27,7 @@ import observadores.ObservadorChat;
 public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat{
     
     private Controlador controlador;
+    private Usuario usuarioLogueado;
     
     private javax.swing.JPanel contenedorMensajes;
     private javax.swing.JPanel contenedorContactos;
@@ -45,8 +47,10 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     @Override
     public void actualizar(Modelo modelo){
         
+        this.usuarioLogueado = modelo.getUsuarioLocal();
         actualizarListaChats(modelo.getChat());
-        System.out.println("a");
+        this.revalidate();
+        this.repaint();
         
     }
     private void configurarContactos() {
@@ -67,14 +71,25 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
             pnlContactos.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         }
     
+
+    
         public void actualizarListaChats(List<Chat> listaChats) {
                 contenedorContactos.removeAll(); 
                 
-                if(listaChats==null || listaChats.isEmpty())
+                System.out.println(usuarioLogueado.toString());
+                if(listaChats==null || listaChats.isEmpty()){
+                
+                    System.out.println("no hay chats iniciales");
                     return;
                 
+                }
+                
                 for (Chat chat : listaChats) {
-                    PanelChatsDisponibles itemChat = new PanelChatsDisponibles(chat);
+                    
+                    if(chat.getUsuarios().getFirst().getId() != usuarioLogueado.getId() && chat.getUsuarios().getLast().getId() != usuarioLogueado.getId())
+                        continue;
+                    
+                    PanelChatsDisponibles itemChat = new PanelChatsDisponibles(chat, usuarioLogueado);
 
                     itemChat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70)); // Altura fija aprox
                     itemChat.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -113,9 +128,9 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
         pnlContactos = new javax.swing.JScrollPane();
         pnlChat = new javax.swing.JScrollPane();
+        jButton1 = new javax.swing.JButton();
         lblAgregar = new javax.swing.JLabel();
         panelEnviarMensaje = new vista.panelEnviarMensaje();
         lblFondo = new javax.swing.JLabel();
@@ -123,6 +138,7 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 800));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        getContentPane().add(pnlContactos, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 260, 670));
 
         jButton1.setText("jButton1");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -130,9 +146,9 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
                 jButton1ActionPerformed(evt);
             }
         });
-        getContentPane().add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 90, -1, -1));
-        getContentPane().add(pnlContactos, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 120, 260, 570));
-        getContentPane().add(pnlChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 122, 470, 540));
+        pnlChat.setViewportView(jButton1);
+
+        getContentPane().add(pnlChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 22, 470, 640));
 
         lblAgregar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/BotonAgregar.png"))); // NOI18N
         lblAgregar.addMouseListener(new java.awt.event.MouseAdapter() {

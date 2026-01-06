@@ -50,7 +50,9 @@ public class Receptor implements Runnable {
                         // Lista de usuarios (para contactos)
                         EventoEnviarUsuarios evento = gson.fromJson(jsonObject, EventoEnviarUsuarios.class);
                         bus.publicar(evento);
-                        
+                    } else if (jsonObject.has("chats")) { // "chats" es el nombre de la lista dentro de EventoSincronizacion
+                        EventoSincronizacion evento = gson.fromJson(jsonObject, EventoSincronizacion.class);
+                        bus.publicar(evento);
                     } 
                     // --- NUEVOS EVENTOS DE LOGIN ---
                     else if (jsonObject.has("loginPedidoDTO")) {
