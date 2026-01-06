@@ -1,11 +1,9 @@
 package emisor;
 
-import DTOs.CrearChatNuevoDTO;
-import DTOs.MensajeEnChatDTO;
 import Interfaz.IBusDeEventos;
 import com.google.gson.Gson;
-import eventos.EventoCrearChatNuevo;
-import eventos.EventoMensajeEnChat;
+import Eventos.EventoCrearChatNuevo;
+import Eventos.EventoMensajeEnChat;
 import java.io.PrintWriter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

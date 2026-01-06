@@ -5,7 +5,7 @@
 package Objetos;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -14,13 +14,13 @@ import java.util.Date;
 public class Mensaje implements Serializable {
     
     private String mensaje;
-    private Date fechaEnviado;
+    private LocalDateTime fechaEnviado;
     private Usuario usuario;
 
     public Mensaje() {
     }
 
-    public Mensaje(String mensaje, Date fechaEnviado, Usuario usuario) {
+    public Mensaje(String mensaje, LocalDateTime fechaEnviado, Usuario usuario) {
         this.mensaje = mensaje;
         this.fechaEnviado = fechaEnviado;
         this.usuario = usuario;
@@ -34,11 +34,11 @@ public class Mensaje implements Serializable {
         this.mensaje = mensaje;
     }
 
-    public Date getFechaEnviado() {
+    public LocalDateTime getFechaEnviado() {
         return fechaEnviado;
     }
 
-    public void setFechaEnviado(Date fechaEnviado) {
+    public void setFechaEnviado(LocalDateTime fechaEnviado) {
         this.fechaEnviado = fechaEnviado;
     }
 

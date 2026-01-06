@@ -1,5 +1,5 @@
 
-package eventos;
+package Eventos;
 
 import DTOs.MensajeEnChatDTO;
 

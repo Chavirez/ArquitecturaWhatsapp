@@ -7,13 +7,16 @@ package ensamblador;
 import DTOs.MensajeEnChatDTO;
 import bus.BusDeEventos;
 import emisor.Emisor;
-import eventos.EventoMensajeEnChat;
+import Eventos.EventoMensajeEnChat;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import receptor.Receptor;
 
@@ -50,6 +53,7 @@ public class Ensamblador {
                 EventoMensajeEnChat e = (EventoMensajeEnChat) evento;
                 System.out.println("\n[PRUEBA] El Bus notificó un nuevo mensaje:");
                 System.out.println("Contenido: " + e.getMensaje().getMensaje());
+                System.out.println("Contenido: " + e.getMensaje().getFechaMensaje());
                 System.out.println("Chat ID: " + e.getMensaje().getIdChat());
             }
         });
@@ -58,7 +62,7 @@ public class Ensamblador {
         System.out.println("[PRUEBA] Creando DTO de mensaje...");
         MensajeEnChatDTO mensajeDTO = new MensajeEnChatDTO(
                 "Hola desde la prueba de arquitectura!", 
-                new Date(), 
+                LocalDateTime.now(), 
                 1, // idUsuario
                 101 // idChat
         );

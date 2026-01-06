@@ -2,19 +2,19 @@
 package DTOs;
 
 import Objetos.Mensaje;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class MensajeEnChatDTO {
     
     private String mensaje;
-    private Date fechaMensaje;
+    private LocalDateTime fechaMensaje;
     private int idUsuario;
     private int idChat;
 
     public MensajeEnChatDTO() {
     }
 
-    public MensajeEnChatDTO(String mensaje, Date fechaMensaje, int idUsuario, int idChat) {
+    public MensajeEnChatDTO(String mensaje, LocalDateTime fechaMensaje, int idUsuario, int idChat) {
         this.mensaje = mensaje;
         this.fechaMensaje = fechaMensaje;
         this.idUsuario = idUsuario;
@@ -29,11 +29,11 @@ public class MensajeEnChatDTO {
         this.mensaje = mensaje;
     }
 
-    public Date getFechaMensaje() {
+    public LocalDateTime getFechaMensaje() {
         return fechaMensaje;
     }
 
-    public void setFechaMensaje(Date fechaMensaje) {
+    public void setFechaMensaje(LocalDateTime fechaMensaje) {
         this.fechaMensaje = fechaMensaje;
     }
 
