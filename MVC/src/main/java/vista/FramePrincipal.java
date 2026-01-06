@@ -5,7 +5,9 @@
 package vista;
 
 import Objetos.Mensaje;
+import java.awt.Dimension;
 import java.time.LocalDateTime;
+import javax.swing.Box;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
@@ -26,21 +28,24 @@ public class FramePrincipal extends javax.swing.JFrame {
     }
 
     private void configurarChat() {
-        // Creamos el panel que realmente tendrá los mensajes
         contenedorMensajes = new javax.swing.JPanel();
 
-        // BoxLayout.Y_AXIS para que se apilen verticalmente
         contenedorMensajes.setLayout(new javax.swing.BoxLayout(contenedorMensajes, javax.swing.BoxLayout.Y_AXIS));
         contenedorMensajes.setOpaque(false);
-
-        // El "pegamento" inicial empuja todo hacia abajo (estilo WhatsApp)
         contenedorMensajes.add(javax.swing.Box.createVerticalGlue());
 
-        // Asignamos este panel como la vista del scroll
         pnlChat.setViewportView(contenedorMensajes);
         pnlChat.getViewport().setOpaque(false);
         pnlChat.setOpaque(false);
         pnlChat.setBorder(null);
+        pnlChat.getVerticalScrollBar().setUI(new EstiloScrollBar());
+
+        pnlChat.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+
+        pnlChat.getVerticalScrollBar().setUnitIncrement(16); 
+
+        pnlChat.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        
     }
     
     
@@ -54,7 +59,6 @@ public class FramePrincipal extends javax.swing.JFrame {
         lblFondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMaximumSize(new java.awt.Dimension(800, 800));
         setMinimumSize(new java.awt.Dimension(800, 800));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -65,7 +69,7 @@ public class FramePrincipal extends javax.swing.JFrame {
             }
         });
         getContentPane().add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 40, -1, -1));
-        getContentPane().add(pnlChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 122, 460, 540));
+        getContentPane().add(pnlChat, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 122, 470, 540));
         getContentPane().add(panelEnviarMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 680, -1, -1));
 
         lblFondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/FondoPrincipal.png"))); // NOI18N
@@ -80,29 +84,29 @@ public class FramePrincipal extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
      
         
-    Mensaje mns1 = new Mensaje();
-    mns1.setMensaje("PruebaPrueba");
-    mns1.setFechaEnviado(LocalDateTime.now());
-    PanelMensajePropio nuevaBurbuja = new PanelMensajePropio(mns1);   
-    PanelMensajePropio nuevaBurbujaaa = new PanelMensajePropio(mns1);   
-    PanelMensajeAjeno nuevaBurbujaa = new PanelMensajeAjeno(mns1);   
-    nuevaBurbuja.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
-    
-    // 2. Añadir al contenedor interno
-    contenedorMensajes.add(nuevaBurbuja);
-    contenedorMensajes.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 10))); 
-    contenedorMensajes.add(nuevaBurbujaaa);
-    contenedorMensajes.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 10))); 
-    
-    // 2. Añadir al contenedor interno
-    contenedorMensajes.add(nuevaBurbujaa);
-    contenedorMensajes.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 10))); 
-    
-    // 3. Refrescar el contenedor
+//Mensaje mns = new Mensaje("Pruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebaruebarueba", LocalDateTime.now(), null);
+Mensaje mns = new Mensaje("Prueba", LocalDateTime.now(), null);
+
+    // PARA MENSAJE PROPIO (Derecha)
+    PanelMensajePropio propia = new PanelMensajePropio(mns);
+    Box filaPropia = Box.createHorizontalBox();
+    filaPropia.setMaximumSize(new Dimension(460, propia.getPreferredSize().height));
+    filaPropia.add(Box.createHorizontalGlue()); // Empuja hacia la derecha
+    filaPropia.add(propia);
+    contenedorMensajes.add(filaPropia);
+
+    // Espaciado
+
+    // PARA MENSAJE AJENO (Izquierda)
+    PanelMensajeAjeno ajena = new PanelMensajeAjeno(mns);
+    Box filaAjena = Box.createHorizontalBox();
+    filaAjena.add(ajena);
+    filaAjena.add(Box.createHorizontalGlue()); 
+    contenedorMensajes.add(filaAjena);
+
+    // Refrescar y Scroll
     contenedorMensajes.revalidate();
     contenedorMensajes.repaint();
-    
-    // 4. Auto-scroll hacia abajo (Usabilidad) 
     javax.swing.SwingUtilities.invokeLater(() -> {
         pnlChat.getVerticalScrollBar().setValue(pnlChat.getVerticalScrollBar().getMaximum());
     });

@@ -14,14 +14,14 @@ public class PanelMensajeAjeno extends JPanel {
     public PanelMensajeAjeno(Mensaje mensaje) {
         this.mensaje = mensaje;
         this.setBorder(new javax.swing.border.EmptyBorder(15, 20, 25, 20));
+        this.setAlignmentX(Component.LEFT_ALIGNMENT); // Alineación a la izquierda
         initComponents();
     }
 
     private void initComponents() {
         setLayout(new BorderLayout(5, 5));
         setOpaque(false); 
-        
-        txtMensaje = new JTextArea("Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...Ejemplo de Texto muy largo...");
+    
         txtMensaje = new JTextArea(mensaje.getMensaje());
         txtMensaje.setLineWrap(true);    
         txtMensaje.setWrapStyleWord(true);
@@ -52,7 +52,7 @@ public class PanelMensajeAjeno extends JPanel {
     
     @Override
     public Dimension getMaximumSize() {
-        return new Dimension(350, super.getPreferredSize().height);
+        return new Dimension(420, super.getPreferredSize().height);
     }
     
     @Override
