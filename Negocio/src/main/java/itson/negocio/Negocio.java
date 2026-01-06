@@ -1,6 +1,8 @@
 package itson.negocio;
 
 import DTOs.CrearChatNuevoDTO;
+import DTOs.LoginPedidoDTO;
+import DTOs.LoginRespuestaDTO;
 import DTOs.MensajeEnChatDTO;
 import DTOs.UsuarioDTO;
 import Eventos.*;
@@ -12,6 +14,7 @@ import interfaz.INegocioListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Negocio {
     
@@ -20,6 +23,7 @@ public class Negocio {
     
     public List<Chat> memoriaChats; 
     private List<Usuario> memoriaUsuarios; 
+    private Set<Integer> usuariosActivos;
 
     public Negocio(IBusDeEventos bus) {
         this.bus = bus;
@@ -82,10 +86,51 @@ public class Negocio {
                  
                  notificarUsuarios();
             }
+            else if (evento instanceof EventoLogIn eventoLogIn) {
+                procesarLogin(eventoLogIn);
+            }
+            else if (evento instanceof EventoCerrarSesion eventoCerrarSesion) {
+                procesarCierreSesion(eventoCerrarSesion);
+            }
         });
     }
 
-    
+    private void procesarLogin(EventoLogIn evento) {
+        LoginPedidoDTO request = evento.getEvento();
+        Usuario usuarioEncontrado = null;
+
+        for (Usuario u : memoriaUsuarios) {
+            if (u.getUsuario().equals(request.getUsuario()) && 
+                u.getContrasenia().equals(request.getPassword())) {
+                usuarioEncontrado = u;
+                break;
+            }
+        }
+
+        if (usuarioEncontrado == null) {
+            bus.publicar(new EventoRespuestaLogin(new LoginRespuestaDTO(false, "Usuario o contraseña incorrectos", null)));
+            return;
+        }
+
+        if (usuariosActivos.contains(usuarioEncontrado.getId())) {
+            bus.publicar(new EventoRespuestaLogin(new LoginRespuestaDTO(false, "El usuario ya tiene una sesión activa.", null)));
+        } else {
+            usuariosActivos.add(usuarioEncontrado.getId());
+            
+            UsuarioDTO uDto = new UsuarioDTO(usuarioEncontrado.getId(), usuarioEncontrado.getUsuario(), "");
+            bus.publicar(new EventoRespuestaLogin(new LoginRespuestaDTO(true, "Login exitoso", uDto)));
+            
+            System.out.println("Negocio: Usuario " + uDto.getNombre() + " ha iniciado sesión.");
+        }
+    }
+
+    private void procesarCierreSesion(EventoCerrarSesion evento) {
+        int idUsuario = evento.getIdUsuarioACerrar();
+        if (usuariosActivos.contains(idUsuario)) {
+            usuariosActivos.remove(idUsuario);
+            System.out.println("Negocio: Usuario ID " + idUsuario + " cerró sesión. Disponible para login.");
+        }
+    }
     public void enviarMensaje(MensajeEnChatDTO dto) {
 
         bus.publicar(new EventoMensajeEnChat(dto));
@@ -96,6 +141,10 @@ public class Negocio {
         bus.publicar(new EventoCrearChatNuevo(dto));
     }
     
+    public void validarLogin(LoginPedidoDTO dto){
+    
+        bus.publicar(new EventoLogIn(dto));
+    }
     public void agregarListener(INegocioListener listener) {
         this.listeners.add(listener);
     }
