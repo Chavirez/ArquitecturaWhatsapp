@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 import receptor.Receptor;
+import servidor.Servidor;
 
 /**
  *
@@ -29,8 +30,9 @@ public class Ensamblador {
     public static void main(String[] args) throws IOException, InterruptedException {
         
         BusDeEventos bus = new BusDeEventos();
-
-        // 2. Simular un socket con Pipes para la prueba
+        Servidor servidor = new Servidor(4444, bus);
+        new Thread(servidor).start();
+        
         PipedOutputStream output = new PipedOutputStream();
         PipedInputStream input = new PipedInputStream(output);
         

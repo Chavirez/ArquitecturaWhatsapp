@@ -9,6 +9,8 @@ import DTOs.MensajeEnChatDTO;
 import Eventos.EventoCrearChatNuevo;
 import Eventos.EventoMensajeEnChat;
 import Interfaz.IBusDeEventos;
+import Objetos.Chat;
+import Objetos.Usuario;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +21,12 @@ import java.util.Map;
  * @author santi
  */
 public class Negocio {
-    private Map<Integer, List<MensajeEnChatDTO>> memoriaMensajes;
+    private List<Chat> memoriaMensajes;
     private IBusDeEventos bus;
 
     public Negocio(IBusDeEventos bus) {
         this.bus = bus;
-        this.memoriaMensajes = new HashMap<>();
+        this.memoriaMensajes = new ArrayList<>();
         configurarSuscripciones();
     }
 
@@ -49,7 +51,7 @@ public class Negocio {
         }
 
         // 2. Almacenamiento en memoria segmentado por Chat ID 
-        memoriaMensajes.computeIfAbsent(dto.getIdChat(), k -> new ArrayList<>()).add(dto);
+//        memoriaMensajes.add
         
         System.out.println("Negocio: Mensaje validado y guardado en memoria para el chat " + dto.getIdChat());
         
@@ -59,12 +61,14 @@ public class Negocio {
     private void procesarNuevoChat(EventoCrearChatNuevo evento) {
         CrearChatNuevoDTO dto = evento.getMensaje();
         // Lógica para inicializar una nueva lista de mensajes en memoria
-        memoriaMensajes.putIfAbsent(dto.hashCode(), new ArrayList<>());
+        List<Usuario> usuarios = new ArrayList<>();
+//        usuarios.add(dto.getIdUsuario1());
+//        usuarios.add(dto.getIdUsuario2());
+//        
+//        Chat nuevoChat = new Chat(mensajes, usuarios)
+//        memoriaMensajes.putIfAbsent(dto.hashCode(), new ArrayList<>());
         System.out.println("Negocio: Nuevo chat registrado entre usuarios " + dto.getIdUsuario1() + " y " + dto.getIdUsuario2());
     }
 
-    // Método para que la UI recupere los mensajes (Usabilidad) 
-    public List<MensajeEnChatDTO> obtenerMensajesPorChat(int idChat) {
-        return memoriaMensajes.getOrDefault(idChat, new ArrayList<>());
-    }
+ 
 }
