@@ -30,8 +30,10 @@ public class Controlador {
         
     }
     
-    public void iniciarLogin() {
+    public void intentarLogin(String usuario, String pass) {
 
+        modelo.intentarLogin(usuario, pass);
+        
     }
     
 }

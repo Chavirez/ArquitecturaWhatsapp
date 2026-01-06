@@ -4,6 +4,7 @@ import DTOs.CrearChatNuevoDTO;
 import DTOs.UsuarioDTO;
 import Eventos.*;
 import bus.BusDeEventos;
+import controlador.Controlador;
 import emisor.Emisor;
 import itson.negocio.Negocio;
 import receptor.Receptor;
@@ -15,6 +16,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Modelo;
 
 public class MainCliente {
 
@@ -43,7 +45,9 @@ public class MainCliente {
             
             generarMocks(bus);
        
-            System.out.println(negocio.memoriaChats.toString());
+            Modelo modelo = new Modelo(negocio);
+            Controlador control = new Controlador(modelo);
+            control.abrirFrameLogin();
 
             System.out.println("Cliente iniciado exitosamente.");
 
@@ -57,11 +61,11 @@ public class MainCliente {
     private static void generarMocks(BusDeEventos bus) {
         List<UsuarioDTO> listaMocks = new ArrayList<>();
         
-        listaMocks.add(new UsuarioDTO(1, "Alice", "1234"));
-        listaMocks.add(new UsuarioDTO(2, "Bob", "1234"));
-        listaMocks.add(new UsuarioDTO(3, "Charlie", "1234"));
-        listaMocks.add(new UsuarioDTO(4, "Dave", "1234"));
-        listaMocks.add(new UsuarioDTO(5, "Eve", "1234"));
+        listaMocks.add(new UsuarioDTO(1, "Santiago", "1234"));
+        listaMocks.add(new UsuarioDTO(2, "Alejandra", "1234"));
+        listaMocks.add(new UsuarioDTO(3, "Gabriel", "1234"));
+        listaMocks.add(new UsuarioDTO(4, "Luis", "1234"));
+        listaMocks.add(new UsuarioDTO(5, "Romina", "1234"));
         
         bus.publicar(new EventoEnviarUsuarios(listaMocks));
         

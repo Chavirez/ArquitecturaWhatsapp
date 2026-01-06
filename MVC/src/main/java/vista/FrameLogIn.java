@@ -116,6 +116,8 @@ public class FrameLogIn extends javax.swing.JFrame implements ObservadorLogin{
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        controlador.intentarLogin(usuario, pass);
     }//GEN-LAST:event_lblBtnLogMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

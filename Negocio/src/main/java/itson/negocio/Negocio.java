@@ -13,6 +13,7 @@ import Objetos.Usuario;
 import interfaz.INegocioListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,8 +23,8 @@ public class Negocio {
     private List<INegocioListener> listeners;
     
     public List<Chat> memoriaChats; 
-    private List<Usuario> memoriaUsuarios; 
-    private Set<Integer> usuariosActivos;
+    private List<Usuario> memoriaUsuarios;  
+    private Set<Integer> usuariosActivos = new HashSet<>();
 
     public Negocio(IBusDeEventos bus) {
         this.bus = bus;

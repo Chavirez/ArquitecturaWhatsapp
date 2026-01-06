@@ -73,6 +73,9 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     @Override
     public void notificarLog(){
+        
+        
+        
     }
 
         
