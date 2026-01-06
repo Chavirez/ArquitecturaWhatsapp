@@ -4,10 +4,14 @@
  */
 package observadores;
 
+import modelo.Modelo;
+
 /**
  *
  * @author santi
  */
 public interface ObservadorChat {
+    
+    public void actualizar(Modelo modelo);
     
 }

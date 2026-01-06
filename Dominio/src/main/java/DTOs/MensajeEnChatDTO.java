@@ -1,24 +1,26 @@
 
 package DTOs;
 
+import Objetos.Chat;
 import Objetos.Mensaje;
+import Objetos.Usuario;
 import java.time.LocalDateTime;
 
 public class MensajeEnChatDTO {
     
     private String mensaje;
     private LocalDateTime fechaMensaje;
-    private int idUsuario;
-    private int idChat;
+    private Usuario usuario;
+    private Chat chat;
 
     public MensajeEnChatDTO() {
     }
 
-    public MensajeEnChatDTO(String mensaje, LocalDateTime fechaMensaje, int idUsuario, int idChat) {
+    public MensajeEnChatDTO(String mensaje, LocalDateTime fechaMensaje, Usuario usuario, Chat chat) {
         this.mensaje = mensaje;
         this.fechaMensaje = fechaMensaje;
-        this.idUsuario = idUsuario;
-        this.idChat = idChat;
+        this.usuario = usuario;
+        this.chat = chat;
     }
 
     public String getMensaje() {
@@ -37,26 +39,27 @@ public class MensajeEnChatDTO {
         this.fechaMensaje = fechaMensaje;
     }
 
-    public int getIdUsuario() {
-        return idUsuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(int idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
-    public int getIdChat() {
-        return idChat;
+    public Chat getChat() {
+        return chat;
     }
 
-    public void setIdChat(int idChat) {
-        this.idChat = idChat;
+    public void setChat(Chat chat) {
+        this.chat = chat;
     }
 
     @Override
     public String toString() {
-        return "MensajeEnChatDTO{" + "mensaje=" + mensaje + ", fechaMensaje=" + fechaMensaje + ", idUsuario=" + idUsuario + ", idChat=" + idChat + '}';
+        return "MensajeEnChatDTO{" + "mensaje=" + mensaje + ", fechaMensaje=" + fechaMensaje + ", usuario=" + usuario + ", chat=" + chat + '}';
     }
-    
+
+
     
 }

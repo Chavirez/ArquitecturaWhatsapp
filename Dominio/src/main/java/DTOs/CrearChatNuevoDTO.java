@@ -5,6 +5,7 @@
 package DTOs;
 
 import Objetos.Chat;
+import Objetos.Usuario;
 
 /**
  *
@@ -12,38 +13,34 @@ import Objetos.Chat;
  */
 public class CrearChatNuevoDTO {
     
-    private int idUsuario1;
-    private int idUsuario2;
+    private Usuario usuario1;
+    private Usuario usuario2;
 
     public CrearChatNuevoDTO() {
     }
 
-    public CrearChatNuevoDTO(int idUsuario1, int idUsuario2) {
-        this.idUsuario1 = idUsuario1;
-        this.idUsuario2 = idUsuario2;
+    public CrearChatNuevoDTO(Usuario usuario1, Usuario usuario2) {
+        this.usuario1 = usuario1;
+        this.usuario2 = usuario2;
     }
 
-    public int getIdUsuario1() {
-        return idUsuario1;
+    public Usuario getUsuario1() {
+        return usuario1;
     }
 
-    public void setIdUsuario1(int idUsuario1) {
-        this.idUsuario1 = idUsuario1;
+    public void setUsuario1(Usuario usuario1) {
+        this.usuario1 = usuario1;
     }
 
-    public int getIdUsuario2() {
-        return idUsuario2;
+    public Usuario getUsuario2() {
+        return usuario2;
     }
 
-    public void setIdUsuario2(int idUsuario2) {
-        this.idUsuario2 = idUsuario2;
+    public void setUsuario2(Usuario usuario2) {
+        this.usuario2 = usuario2;
     }
 
-    @Override
-    public String toString() {
-        return "CrearChatNuevoDTO{" + "idUsuario1=" + idUsuario1 + ", idUsuario2=" + idUsuario2 + '}';
-    }
-    
+
     
     
     

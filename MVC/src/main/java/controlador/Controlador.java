@@ -36,8 +36,13 @@ public class Controlador {
     public void abrirFramePrincipal(){
     
         FramePrincipal frm = new FramePrincipal(this);
+        
+        modelo.agregarListenerChat(frm);
+        
         frm.setVisible(true);
         
+        modelo.notificarChat();
+
     }
  
     

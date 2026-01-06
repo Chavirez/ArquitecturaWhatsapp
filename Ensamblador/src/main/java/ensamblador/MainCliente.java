@@ -42,9 +42,7 @@ public class MainCliente {
             new Thread(emisor).start();
             new Thread(receptor).start();
 
-            
-            generarMocks(bus);
-       
+           
             Modelo modelo = new Modelo(negocio);
             Controlador control = new Controlador(modelo);
             control.abrirFrameLogin();
@@ -58,26 +56,5 @@ public class MainCliente {
         }
     }
 
-    private static void generarMocks(BusDeEventos bus) {
-        List<UsuarioDTO> listaMocks = new ArrayList<>();
-        
-        listaMocks.add(new UsuarioDTO(1, "Santiago", "1234"));
-        listaMocks.add(new UsuarioDTO(2, "Alejandra", "1234"));
-        listaMocks.add(new UsuarioDTO(3, "Gabriel", "1234"));
-        listaMocks.add(new UsuarioDTO(4, "Luis", "1234"));
-        listaMocks.add(new UsuarioDTO(5, "Romina", "1234"));
-        
-        bus.publicar(new EventoEnviarUsuarios(listaMocks));
-        
-        bus.publicar(new EventoCrearChatNuevo(new CrearChatNuevoDTO(1,2)));
-        bus.publicar(new EventoCrearChatNuevo(new CrearChatNuevoDTO(1,3)));
-        bus.publicar(new EventoCrearChatNuevo(new CrearChatNuevoDTO(2,3)));
-        bus.publicar(new EventoCrearChatNuevo(new CrearChatNuevoDTO(1,4)));
-        bus.publicar(new EventoCrearChatNuevo(new CrearChatNuevoDTO(2,4)));
-        bus.publicar(new EventoCrearChatNuevo(new CrearChatNuevoDTO(3,4)));
-        bus.publicar(new EventoCrearChatNuevo(new CrearChatNuevoDTO(1,5)));
-        bus.publicar(new EventoCrearChatNuevo(new CrearChatNuevoDTO(2,5)));
 
-        
-    }
 }

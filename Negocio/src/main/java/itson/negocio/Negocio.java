@@ -43,8 +43,9 @@ public class Negocio {
                 // ... lógica existente de mensajes ...
                 MensajeEnChatDTO dto = eventoMensajeEnChat.getMensaje();
                 for(Chat chat : memoriaChats){
-                    if(chat.getId() == dto.getIdChat()){
-                        Mensaje mensajeN = new Mensaje(dto.getMensaje(), dto.getFechaMensaje(), dto.getIdUsuario());
+                    System.out.println(chat.toString());
+                    if(chat.getId() == dto.getChat().getId()){
+                        Mensaje mensajeN = new Mensaje(dto.getMensaje(), dto.getFechaMensaje(), dto.getUsuario());
                         chat.getMensajes().add(mensajeN);
                     }
                 }
@@ -56,7 +57,7 @@ public class Negocio {
                 List<Mensaje> mVacio = new ArrayList<>();
                 List<Usuario> usuarios = new ArrayList<>();
                 for(Usuario u : memoriaUsuarios){
-                    if(u.getId() == dto.getIdUsuario1() || u.getId() == dto.getIdUsuario2())
+                    if(u.getId() == dto.getUsuario1().getId() || u.getId() == dto.getUsuario2().getId())
                         usuarios.add(u);
                 }
                 Chat chatNuevo = new Chat(memoriaChats.size()+1, mVacio, usuarios);
@@ -74,13 +75,10 @@ public class Negocio {
                  this.memoriaUsuarios = usuariosAG;
                  notificarUsuarios();
             }
-            // --- EVENTOS DE LOGIN ---
             else if (evento instanceof EventoLogIn eventoLogIn) {
-                // Esto ocurre en el LADO SERVIDOR (o quien procesa la lógica)
                 procesarLogin(eventoLogIn);
             }
             else if (evento instanceof EventoRespuestaLogin eventoRespuesta) {
-                // Esto ocurre en el LADO CLIENTE (recibir la respuesta)
                 procesarRespuestaLogin(eventoRespuesta);
             }
             else if (evento instanceof EventoCerrarSesion eventoCerrarSesion) {
@@ -188,6 +186,7 @@ public class Negocio {
 
     private void notificarMensaje() {
         for (INegocioListener listener : listeners) {
+            System.out.println(memoriaChats);
             listener.recibirChat(memoriaChats);
         }
     }

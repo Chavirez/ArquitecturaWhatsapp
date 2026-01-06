@@ -16,12 +16,14 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
+import modelo.Modelo;
+import observadores.ObservadorChat;
 
 /**
  *
  * @author santi
  */
-public class FramePrincipal extends javax.swing.JFrame {
+public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat{
     
     private Controlador controlador;
     
@@ -36,9 +38,17 @@ public class FramePrincipal extends javax.swing.JFrame {
         initComponents();
         configurarChat();
         configurarContactos();
+        
 
     }
     
+    @Override
+    public void actualizar(Modelo modelo){
+        
+        actualizarListaChats(modelo.getChat());
+        System.out.println("a");
+        
+    }
     private void configurarContactos() {
             contenedorContactos = new JPanel();
             contenedorContactos.setLayout(new BoxLayout(contenedorContactos, BoxLayout.Y_AXIS));
@@ -58,20 +68,19 @@ public class FramePrincipal extends javax.swing.JFrame {
         }
     
         public void actualizarListaChats(List<Chat> listaChats) {
-                contenedorContactos.removeAll(); // Limpiar lista anterior
-
+                contenedorContactos.removeAll(); 
+                
+                if(listaChats==null || listaChats.isEmpty())
+                    return;
+                
                 for (Chat chat : listaChats) {
-                    // Crear el panel individual para cada chat
                     PanelChatsDisponibles itemChat = new PanelChatsDisponibles(chat);
 
-                    // Ajustar tamaño máximo para que no se estire de más
                     itemChat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70)); // Altura fija aprox
                     itemChat.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-                    // Agregar al contenedor
                     contenedorContactos.add(itemChat);
 
-                    // Espacio entre chats (opcional)
                     contenedorContactos.add(Box.createRigidArea(new Dimension(0, 5)));
                 }
 
@@ -142,26 +151,26 @@ public class FramePrincipal extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
-        Mensaje mns = new Mensaje("Prueba", LocalDateTime.now(), 0);
-
-        PanelMensajePropio propia = new PanelMensajePropio(mns);
-        Box filaPropia = Box.createHorizontalBox();
-        filaPropia.setMaximumSize(new Dimension(460, propia.getPreferredSize().height));
-        filaPropia.add(Box.createHorizontalGlue()); // Empuja hacia la derecha
-        filaPropia.add(propia);
-        contenedorMensajes.add(filaPropia);
-
-        PanelMensajeAjeno ajena = new PanelMensajeAjeno(mns);
-        Box filaAjena = Box.createHorizontalBox();
-        filaAjena.add(ajena);
-        filaAjena.add(Box.createHorizontalGlue());
-        contenedorMensajes.add(filaAjena);
-
-        contenedorMensajes.revalidate();
-        contenedorMensajes.repaint();
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            pnlChat.getVerticalScrollBar().setValue(pnlChat.getVerticalScrollBar().getMaximum());
-        });
+//        Mensaje mns = new Mensaje("Prueba", LocalDateTime.now(), 0);
+//
+//        PanelMensajePropio propia = new PanelMensajePropio(mns);
+//        Box filaPropia = Box.createHorizontalBox();
+//        filaPropia.setMaximumSize(new Dimension(460, propia.getPreferredSize().height));
+//        filaPropia.add(Box.createHorizontalGlue()); // Empuja hacia la derecha
+//        filaPropia.add(propia);
+//        contenedorMensajes.add(filaPropia);
+//
+//        PanelMensajeAjeno ajena = new PanelMensajeAjeno(mns);
+//        Box filaAjena = Box.createHorizontalBox();
+//        filaAjena.add(ajena);
+//        filaAjena.add(Box.createHorizontalGlue());
+//        contenedorMensajes.add(filaAjena);
+//
+//        contenedorMensajes.revalidate();
+//        contenedorMensajes.repaint();
+//        javax.swing.SwingUtilities.invokeLater(() -> {
+//            pnlChat.getVerticalScrollBar().setValue(pnlChat.getVerticalScrollBar().getMaximum());
+//        });
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void lblAgregarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblAgregarMouseClicked

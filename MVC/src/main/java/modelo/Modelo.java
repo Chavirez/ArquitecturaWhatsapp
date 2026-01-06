@@ -22,7 +22,7 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     private Negocio negocio; 
     
     private Usuario usuarioLocal;
-    private Chat chatActual;
+    private List<Chat> chats;
     
     private List<ObservadorChat> chat = new ArrayList<>();
     private List<ObservadorLogin> log = new ArrayList<>();
@@ -30,6 +30,8 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     public Modelo(Negocio negocio) {
         this.negocio = negocio;
+        
+        this.negocio.agregarListener(this);
         
     }
     
@@ -44,18 +46,7 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     public void suscribirListaChats(Consumer<List<Chat>> metodoVista) {
             this.notificarVistaChats = metodoVista;
         }
-    public void enviarMensaje(String texto) {
-        if (usuarioLocal == null) return;
 
-        MensajeEnChatDTO dto = new MensajeEnChatDTO(
-                texto, 
-                LocalDateTime.now(), 
-                usuarioLocal.getId(), 
-                1 
-        );
-        
-        negocio.enviarMensaje(dto);
-    }
 
     public void intentarLogin(String usuario, String pass) {
             LoginPedidoDTO loginDto = new LoginPedidoDTO(usuario, pass);
@@ -87,12 +78,29 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     
     @Override
     public void notificarChat(){
+        
+        System.out.println(negocio.memoriaChats.toString());
+        
+        if (negocio.memoriaChats != null) {
+                recibirChat(negocio.memoriaChats);
+            }
+        for (ObservadorChat obs : chat) {
+            obs.actualizar(this);
+        }
     }
     
     @Override
     public void recibirLogin(LoginRespuestaDTO dto) {
+        if (dto.getUsuarioLogueado() != null) {
+                setUsuarioLocal(new Usuario(
+                    dto.getUsuarioLogueado().getId(), 
+                    dto.getUsuarioLogueado().getNombre(), 
+                    dto.getUsuarioLogueado().getPassword()
+                ));
+            }
 
-        setUsuarioLocal(new Usuario(dto.getUsuarioLogueado().getId(), dto.getUsuarioLogueado().getNombre(), dto.getUsuarioLogueado().getPassword()));
+            // 2. IMPORTANTE: Notificar a la Vista (FrameLogIn) para que reaccione
+            notificarLogin(dto);
     }
     @Override
     public void recibirUsuarios(List<Usuario> usuarios) {
@@ -116,12 +124,16 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
         return usuarioLocal;
     }
 
-    public Chat getChatActual() {
-        return chatActual;
+    public List<Chat> getChat() {
+                System.out.println("a");
+
+        return chats;
     }
 
-    public void setChatActual(Chat chatActual) {
-        this.chatActual = chatActual;
+    public void setChat(List<Chat> chat) {
+        this.chats = chat;
     }
+
+
     
 }
