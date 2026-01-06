@@ -21,34 +21,30 @@ import java.util.Map;
  * @author santi
  */
 public class Negocio {
-    private List<Chat> memoriaMensajes;
+    private List<Chat> memoriaChats;
+    private List<Usuario> memoriaUsuarios;
     private IBusDeEventos bus;
 
     public Negocio(IBusDeEventos bus) {
         this.bus = bus;
-        this.memoriaMensajes = new ArrayList<>();
+        this.memoriaChats = new ArrayList<>();
+        this.memoriaUsuarios = new ArrayList<>();
         configurarSuscripciones();
     }
 
     private void configurarSuscripciones() {
-        // Suscripción al bus para recibir mensajes en tiempo real [cite: 1, 11]
+        
         bus.getInstancia().suscribir(evento -> {
-            if (evento instanceof EventoMensajeEnChat) {
-                procesarMensajeRecibido((EventoMensajeEnChat) evento);
-            } else if (evento instanceof EventoCrearChatNuevo) {
-                procesarNuevoChat((EventoCrearChatNuevo) evento);
+            if (evento instanceof EventoMensajeEnChat eventoMensajeEnChat) {
+                procesarMensajeRecibido(eventoMensajeEnChat);
+            } else if (evento instanceof EventoCrearChatNuevo eventoCrearChatNuevo) {
+                procesarNuevoChat(eventoCrearChatNuevo);
             }
         });
     }
 
     private void procesarMensajeRecibido(EventoMensajeEnChat evento) {
         MensajeEnChatDTO dto = evento.getMensaje();
-
-        // 1. Validaciones Lógicas (Requisito del examen) 
-        if (dto.getMensaje() == null || dto.getMensaje().trim().isEmpty()) {
-            System.err.println("Negocio: Intento de guardar un mensaje vacío ignorado.");
-            return;
-        }
 
         // 2. Almacenamiento en memoria segmentado por Chat ID 
 //        memoriaMensajes.add

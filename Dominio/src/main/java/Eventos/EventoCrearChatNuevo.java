@@ -11,13 +11,13 @@ import DTOs.CrearChatNuevoDTO;
  * @author santi
  */
 public class EventoCrearChatNuevo {
-    private final CrearChatNuevoDTO chat;
+    private final CrearChatNuevoDTO chatNuevo;
 
     public EventoCrearChatNuevo(CrearChatNuevoDTO chat) {
-        this.chat = chat;
+        this.chatNuevo = chat;
     }
 
     public CrearChatNuevoDTO getMensaje() { 
-        return chat; 
+        return chatNuevo; 
     }
 }

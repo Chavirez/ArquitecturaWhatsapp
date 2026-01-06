@@ -4,10 +4,13 @@ import Interfaz.IBusDeEventos;
 import com.google.gson.Gson;
 import Eventos.EventoCrearChatNuevo;
 import Eventos.EventoMensajeEnChat;
+import com.google.gson.GsonBuilder;
 import java.io.PrintWriter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import interfaz.IEmisor;
+import java.time.LocalDateTime;
+import utilidades.LocalDateTimeAdapter;
 
 public class Emisor implements IEmisor, Runnable {
 
@@ -20,29 +23,20 @@ public class Emisor implements IEmisor, Runnable {
         this.escritor = escritor;
         this.bus = bus;
         
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .create();
         
         bus.getInstancia().suscribir(evento -> {
-                    if (evento instanceof EventoMensajeEnChat) {
-                        EventoMensajeEnChat e = (EventoMensajeEnChat) evento;
-                        
-                        String datoSerializado = gson.toJson(e);
+
+
+                        String datoSerializado = gson.toJson(evento);
                         try {
                             this.enviar(datoSerializado); // Lo mete a la cola interna
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
-                    }
-                    if (evento instanceof EventoCrearChatNuevo) {
-                        EventoCrearChatNuevo e = (EventoCrearChatNuevo) evento;
-                        
-                        String datoSerializado = gson.toJson(e);
-                        try {
-                            this.enviar(datoSerializado); // Lo mete a la cola interna
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
+                    
                 });
         }
     

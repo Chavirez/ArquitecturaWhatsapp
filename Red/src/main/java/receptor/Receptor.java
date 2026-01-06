@@ -1,49 +1,60 @@
 package receptor;
 
+import Eventos.EventoCrearChatNuevo;
+import Eventos.EventoMensajeEnChat;
 import Interfaz.IBusDeEventos;
-import interfaz.IReceptor;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.time.LocalDateTime;
+import utilidades.LocalDateTimeAdapter;
 
-public class Receptor implements IReceptor, Runnable {
+public class Receptor implements Runnable {
 
-    private BufferedReader lector;
-    private BlockingQueue<String> cola;
-    private IBusDeEventos bus;
+    private final BufferedReader lector;
+    private final IBusDeEventos bus;
+    private final Gson gson;
 
     public Receptor(BufferedReader lector, IBusDeEventos bus) {
-        this.cola = new LinkedBlockingQueue<>();
         this.lector = lector;
         this.bus = bus;
+        // Configuramos GSON con el adaptador de fecha
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
     }
 
     @Override
     public void run() {
         try {
-            System.out.println("Receptor iniciado:");
-            while (!Thread.currentThread().isInterrupted()) {
-                String datoRecibido = lector.readLine();
-                if (datoRecibido != null) {
-                    System.out.println("Datos recibidos en Red: " + datoRecibido);
+            String cadenaJson;
+            while ((cadenaJson = lector.readLine()) != null) {
+                try {
+                    JsonObject jsonObject = JsonParser.parseString(cadenaJson).getAsJsonObject();
+
+                    if (jsonObject.has("mensajeAEnviar")) {
+                        EventoMensajeEnChat evento = gson.fromJson(jsonObject, EventoMensajeEnChat.class);
+                        bus.publicar(evento);
+                        System.out.println("[RECEPTOR] Mensaje recibido y publicado.");
+
+                    } else if (jsonObject.has("chatNuevo")) {
+                        EventoCrearChatNuevo evento = gson.fromJson(jsonObject, EventoCrearChatNuevo.class);
+                        bus.publicar(evento);
+                        System.out.println("[RECEPTOR] Solicitud de nuevo chat recibida.");
+                    } else {
+                        System.err.println("[RECEPTOR] JSON desconocido: " + cadenaJson);
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("[RECEPTOR] Error procesando JSON: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error en recepción: " + e.getMessage());
+            System.err.println("[RECEPTOR] Desconexión: " + e.getMessage());
         }
     }
-    
-    @Override
-    public void recibir() {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    String mensaje = cola.take();
-
-                    bus.getInstancia().publicar(mensaje);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
 }

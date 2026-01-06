@@ -1,84 +1,95 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package ensamblador;
 
 import DTOs.MensajeEnChatDTO;
+import Eventos.EventoMensajeEnChat;
 import bus.BusDeEventos;
 import emisor.Emisor;
-import Eventos.EventoMensajeEnChat;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintWriter;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
 import receptor.Receptor;
 import servidor.Servidor;
+import javax.swing.JOptionPane;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.time.LocalDateTime;
 
-/**
- *
- * @author santi
- */
 public class Ensamblador {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        
-        BusDeEventos bus = new BusDeEventos();
-        Servidor servidor = new Servidor(4444, bus);
-        new Thread(servidor).start();
-        
-        PipedOutputStream output = new PipedOutputStream();
-        PipedInputStream input = new PipedInputStream(output);
-        
-        PrintWriter escritor = new PrintWriter(output, true);
-        BufferedReader lector = new BufferedReader(new InputStreamReader(input));
+    public static void main(String[] args) {
+        try {
+            // 1. Preguntar el ROL de esta computadora
+            String[] opciones = {"Crear Servidor (Host)", "Unirme como Cliente"};
+            int seleccion = JOptionPane.showOptionDialog(null, 
+                    "¿Qué rol tendrá esta computadora?", 
+                    "Configuración de Red", 
+                    JOptionPane.DEFAULT_OPTION, 
+                    JOptionPane.INFORMATION_MESSAGE, 
+                    null, opciones, opciones[0]);
 
-        // 3. Inicializar Componentes de Red 
-        Emisor emisor = new Emisor(escritor, bus);
-        Receptor receptor = new Receptor(lector, bus);
+            BusDeEventos bus = new BusDeEventos();
+            String ipDestino = "localhost"; // Por defecto
+            int puerto = 4444;
 
-        // Iniciar hilos de red 
-        Thread hiloEmisor = new Thread(emisor);
-        Thread hiloReceptor = new Thread(receptor);
-        hiloEmisor.start();
-        hiloReceptor.start();
-
-        // 4. Suscribir un "Mock de Negocio" al bus para ver qué llega al final 
-        bus.suscribir(evento -> {
-            if (evento instanceof EventoMensajeEnChat) {
-                EventoMensajeEnChat e = (EventoMensajeEnChat) evento;
-                System.out.println("\n[PRUEBA] El Bus notificó un nuevo mensaje:");
-                System.out.println("Contenido: " + e.getMensaje().getMensaje());
-                System.out.println("Contenido: " + e.getMensaje().getFechaMensaje());
-                System.out.println("Chat ID: " + e.getMensaje().getIdChat());
+            if (seleccion == 0) {
+                // --- MODO SERVIDOR ---
+                // Iniciamos el servidor en segundo plano
+                Servidor servidor = new Servidor(puerto, bus);
+                new Thread(servidor).start();
+                
+                JOptionPane.showMessageDialog(null, 
+                        "Servidor iniciado en el puerto " + puerto + ".\n" +
+                        "Los demás deben conectarse a TU dirección IP local.");
+                
+                // El propio servidor también se conecta como cliente a sí mismo
+                ipDestino = "localhost"; 
+                
+            } else {
+                // --- MODO CLIENTE ---
+                // Pedimos la IP de la computadora servidor
+                ipDestino = JOptionPane.showInputDialog(null, 
+                        "Ingresa la IP del Servidor:", 
+                        "192.168.1.X");
+                
+                if (ipDestino == null || ipDestino.isEmpty()) return; // Cancelado
             }
-        });
 
-        // 5. EJECUCIÓN DE LA PRUEBA: Enviar un mensaje
-        System.out.println("[PRUEBA] Creando DTO de mensaje...");
-        MensajeEnChatDTO mensajeDTO = new MensajeEnChatDTO(
-                "Hola desde la prueba de arquitectura!", 
+            // 2. CONEXIÓN DEL CLIENTE (Común para ambos)
+            System.out.println("Conectando a " + ipDestino + ":" + puerto + "...");
+            Socket socket = new Socket(ipDestino, puerto);
+            
+            // Inicializar flujos
+            PrintWriter escritor = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            // Inicializar Componentes de tu Arquitectura
+            Emisor emisor = new Emisor(escritor, bus);
+            Receptor receptor = new Receptor(lector, bus);
+
+            new Thread(emisor).start();
+            new Thread(receptor).start();
+            
+            System.out.println("¡Conexión establecida con éxito!");
+
+            // 3. PRUEBA DE ENVÍO AUTOMÁTICO
+            // Enviamos un mensaje de saludo para confirmar que funcionó
+            String nombreUsuario = (seleccion == 0) ? "Servidor" : "Cliente Remoto";
+            
+            MensajeEnChatDTO mensajeDTO = new MensajeEnChatDTO(
+                "Hola, soy " + nombreUsuario + " desde " + socket.getLocalAddress(), 
                 LocalDateTime.now(), 
-                1, // idUsuario
-                101 // idChat
-        );
+                1, 101
+            );
+            
+            // Damos un segundo para que los hilos arranquen
+            Thread.sleep(1000); 
+            bus.publicar(new EventoMensajeEnChat(mensajeDTO));
 
-        System.out.println("[PRUEBA] Publicando evento en el bus...");
-        // Al publicar esto, el Emisor lo captura, lo serializa a JSON y lo envía 
-        bus.publicar(new EventoMensajeEnChat(mensajeDTO));
+            // Aquí normalmente arrancarías tu FramePrincipal
+            // new vista.FramePrincipal().setVisible(true);
 
-        // Dar un momento para que los hilos procesen
-        Thread.sleep(1000);
-
-        System.out.println("\n[PRUEBA] Fin de la simulación.");
-        hiloEmisor.interrupt();
-        hiloReceptor.interrupt();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error de conexión: " + e.getMessage());
+        }
     }
-    
 }
