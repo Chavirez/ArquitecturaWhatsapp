@@ -22,7 +22,7 @@ public class MensajeEnChatDTO {
         this.usuario = usuario;
         this.chat = chat;
     }
-
+    
     public String getMensaje() {
         return mensaje;
     }

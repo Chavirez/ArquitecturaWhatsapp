@@ -1,25 +1,20 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package vista;
 
+import Objetos.Chat;
+import controlador.Controlador;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.time.LocalDateTime;
 import javax.swing.JOptionPane;
-import javax.swing.UIManager;
 
-/**
- *
- * @author santi
- */
+
 public class panelEnviarMensaje extends javax.swing.JPanel {
 
-    /**
-     * Creates new form panelEnviarMensaje
-     */
-    public panelEnviarMensaje(  ) {
+    private Controlador controlador;
+    
+    public panelEnviarMensaje(Controlador controlador) {
         initComponents();
+        this.controlador = controlador;
         this.setOpaque(false);
         lblEnviar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
@@ -28,6 +23,8 @@ public class panelEnviarMensaje extends javax.swing.JPanel {
         fldMensaje.setBorder(null);
         fldMensaje.setCaretColor(Color.BLACK);       
 
+        
+        
         this.revalidate();
         this.repaint();
     }
@@ -94,6 +91,8 @@ public class panelEnviarMensaje extends javax.swing.JPanel {
             
             fldMensaje.setText("");
             fldMensaje.requestFocus(); 
+            
+            this.controlador.enviarMensaje(texto, LocalDateTime.now());
         
     }//GEN-LAST:event_lblEnviarMouseClicked
 

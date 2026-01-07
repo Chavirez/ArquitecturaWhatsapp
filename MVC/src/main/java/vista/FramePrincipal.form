@@ -62,6 +62,9 @@
       </Constraints>
     </Component>
     <Component class="vista.panelEnviarMensaje" name="panelEnviarMensaje">
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new vista.panelEnviarMensaje(controlador)"/>
+      </AuxValues>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
           <AbsoluteConstraints x="320" y="680" width="-1" height="-1"/>

@@ -145,7 +145,6 @@ public class FrameLogIn extends javax.swing.JFrame implements ObservadorLogin{
         
         controlador.intentarLogin(usuario, pass);
 
-        JOptionPane.showMessageDialog(this, "Esperando respuesta del servidor...");
 
         
     }//GEN-LAST:event_lblBtnLogMouseClicked

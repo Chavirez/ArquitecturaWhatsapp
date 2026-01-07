@@ -5,9 +5,13 @@
 package controlador;
 
 import DTOs.CrearChatNuevoDTO;
+import DTOs.MensajeEnChatDTO;
+import Objetos.Chat;
 import Objetos.Usuario;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import modelo.Modelo;
 import observadores.ObservadorLogin;
 import vista.FrameLogIn;
@@ -56,7 +60,6 @@ public class Controlador {
     public void crearChatCon(Usuario usuarioDestino) {
         if (usuarioDestino == null) return;
 
-        // Creamos el DTO con los dos IDs
         CrearChatNuevoDTO dto = new CrearChatNuevoDTO(modelo.getUsuarioLocal(), usuarioDestino);
 
         modelo.crearChat(dto);
@@ -67,6 +70,19 @@ public class Controlador {
 
         modelo.intentarLogin(usuario, pass);
         
+    }
+    
+    public void seleccionarChat(Chat chat){
+        
+        modelo.setChatSeleccionado(chat);
+        
+    }
+    
+    public void enviarMensaje(String mensaje, LocalDateTime fecha){
+    
+
+        MensajeEnChatDTO dto = new MensajeEnChatDTO(mensaje, fecha, modelo.getUsuarioLocal(), modelo.getChatSeleccionado());
+        modelo.enviarMensaje(dto);
     }
     
 }

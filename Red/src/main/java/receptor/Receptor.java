@@ -50,6 +50,7 @@ public class Receptor implements Runnable {
 
                     // 1. MENSAJES DE CHAT
                     if (jsonObject.has("mensajeAEnviar")) {
+                        System.out.println("a");
                         EventoMensajeEnChat evento = gson.fromJson(jsonObject, EventoMensajeEnChat.class);
                         // Lógica de "Disfraz" solo para Cliente
                         if (esCliente) bus.publicar(new EventoMensajeRecibido(evento));

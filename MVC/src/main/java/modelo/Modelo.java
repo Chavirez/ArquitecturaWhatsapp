@@ -25,6 +25,7 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
     private Negocio negocio; 
     
     private Usuario usuarioLocal;
+    private Chat chatSeleccionado;
     private List<Chat> chats;
     private List<Usuario> usuarios;
     
@@ -57,17 +58,6 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
  
             negocio.validarLogin(loginDto); 
         }
-
-
-
-//        public void cerrarSesion() {
-//            if (usuarioLocal != null) {
-//                // Avisar al servidor que libere el ID
-//                negocio.cerrarSesion(usuarioLocal.getId());
-//            }
-//        }
-//    }
-    
     
     @Override
         public void notificarLogin(LoginRespuestaDTO respuesta) {
@@ -120,13 +110,16 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
             negocio.crearChat(dto);
         }
     
-public List<Usuario> getUsuariosDisponiblesParaChat() {
+    public void enviarMensaje(MensajeEnChatDTO dto){
+        negocio.enviarMensaje(dto);
+    }
+    
+    public List<Usuario> getUsuariosDisponiblesParaChat() {
         List<Usuario> disponibles = new ArrayList<>();
 
-        if (usuarios == null || usuarioLocal == null || chats == null) {
-            return disponibles;
-        }
 
+
+        System.out.println("aqui");
         Set<Integer> idsOcupados = new HashSet<>();
         
         for (Chat c : chats) {
@@ -173,6 +166,12 @@ public List<Usuario> getUsuariosDisponiblesParaChat() {
         this.chats = chat;
     }
 
+    public Chat getChatSeleccionado() {
+        return chatSeleccionado;
+    }
 
+    public void setChatSeleccionado(Chat chatSeleccionado) {
+        this.chatSeleccionado = chatSeleccionado;
+    }
     
 }

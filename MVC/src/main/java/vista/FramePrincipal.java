@@ -53,6 +53,7 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
         this.modelo = modelo;
         this.usuarioLogueado = modelo.getUsuarioLocal();
         actualizarListaChats(modelo.getChat());
+        cargarMensajesDelChat(modelo.getChatSeleccionado());
         this.revalidate();
         this.repaint();
         
@@ -61,20 +62,17 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     private void cargarMensajesDelChat(Chat chat) {
         this.chatSeleccionadoActual = chat;
 
-        // 1. Limpiamos el CONTENEDOR INTERNO, no el ScrollPane
+        controlador.seleccionarChat(chat);
+        
         contenedorMensajes.removeAll();
 
-        // El layout ya se definió en configurarChat(), pero no hace daño asegurarlo
-        // contenedorMensajes.setLayout(new BoxLayout(contenedorMensajes, BoxLayout.Y_AXIS));
 
         int idMiUsuario = usuarioLogueado.getId();
 
-        // 2. Iteramos los mensajes
         for (Mensaje m : chat.getMensajes()) {
-            if (m.getUsuario().getId() == idMiUsuario) { // Nota: Revisa si es m.getIdUsuario() o m.getUsuario().getId()
+            if (m.getUsuario().getId() == idMiUsuario) { 
                 PanelMensajePropio panelMio = new PanelMensajePropio(m);
 
-                // Alineación a la derecha para mensajes propios
                 panelMio.setAlignmentX(Component.RIGHT_ALIGNMENT); 
 
                 contenedorMensajes.add(panelMio);
@@ -91,14 +89,9 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
             }
         }
 
-        // 3. Importante: Agregar "Pegamento" al final si quieres que empiecen desde arriba
-        // Opcional: contenedorMensajes.add(Box.createVerticalGlue());
-
-        // 4. Refrescar visualmente
         contenedorMensajes.revalidate();
         contenedorMensajes.repaint();
 
-        // 5. Bajar el scroll automáticamente al último mensaje
         javax.swing.SwingUtilities.invokeLater(() -> {
             pnlChat.getVerticalScrollBar().setValue(pnlChat.getVerticalScrollBar().getMaximum());
     });}
@@ -186,7 +179,7 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
         pnlContactos = new javax.swing.JScrollPane();
         pnlChat = new javax.swing.JScrollPane();
         lblAgregar = new javax.swing.JLabel();
-        panelEnviarMensaje = new vista.panelEnviarMensaje();
+        panelEnviarMensaje = new vista.panelEnviarMensaje(controlador);
         lblFondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -212,6 +205,7 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
 
     private void lblAgregarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblAgregarMouseClicked
     List<Usuario> usuarios = controlador.getUsuariosDisponiblesParaChat();
+    
     
     if (usuarios.isEmpty()) {
         JOptionPane.showMessageDialog(this, "No hay más usuarios");
