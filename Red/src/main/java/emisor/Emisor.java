@@ -1,5 +1,6 @@
 package emisor;
 
+import Eventos.EventoChatRecibido;
 import Interfaz.IBusDeEventos;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,9 +10,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import interfaz.IEmisor;
 import java.time.LocalDateTime;
 import utilidades.LocalDateTimeAdapter;
-// Imports de los eventos a filtrar
+// Imports de eventos para filtrar
 import Eventos.EventoSincronizacion;
 import Eventos.EventoEnviarUsuarios;
+import Eventos.EventoMensajeRecibido;
 import Eventos.EventoRespuestaLogin;
 
 public class Emisor implements IEmisor, Runnable {
@@ -26,26 +28,31 @@ public class Emisor implements IEmisor, Runnable {
         this.cola = new LinkedBlockingQueue<>();
         this.escritor = escritor;
         this.bus = bus;
-        this.esCliente = esCliente;
+        this.esCliente = esCliente; // Guardamos quién soy
         
         Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                     .create();
         
+        // Usamos 'this.bus' directamente (sin getInstancia)
         this.bus.suscribir(evento -> {
             if (evento != null) {
-                // --- FILTRO PARA ROMPER EL BUCLE ---
+                
+                if (evento instanceof EventoMensajeRecibido || 
+                    evento instanceof EventoChatRecibido) {
+                return; 
+                                }
+                // --- FILTRO ANTI-ECO ---
                 if (this.esCliente) {
-                    // El cliente NUNCA debe enviar estos eventos al servidor,
-                    // solo debe recibirlos. Si los ve en el bus, es porque llegaron
-                    // del Receptor y no debemos hacer eco.
+                    // Si soy Cliente, IGNORO los eventos que envía el servidor.
+                    // Solo debo enviar lo que genera mi Interfaz Gráfica.
                     if (evento instanceof EventoSincronizacion || 
                         evento instanceof EventoEnviarUsuarios || 
                         evento instanceof EventoRespuestaLogin) {
-                        return; // Ignoramos el evento, no lo enviamos
+                        return; // NO ENVIAR
                     }
                 }
-                // -----------------------------------
+                // -----------------------
 
                 String datoSerializado = gson.toJson(evento);
                 try {
@@ -57,6 +64,7 @@ public class Emisor implements IEmisor, Runnable {
         });
     }
     
+    // ... (El resto de los métodos enviar y run quedan igual) ...
     @Override
     public void enviar(String dato) throws InterruptedException {
         this.cola.put(dato);

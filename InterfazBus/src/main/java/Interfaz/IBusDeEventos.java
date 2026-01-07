@@ -15,4 +15,5 @@ public interface IBusDeEventos {
     
     public void suscribir(Consumer<Object> suscriptor);
     public void publicar(Object evento);
+    public BusDeEventos getInstancia();
 }

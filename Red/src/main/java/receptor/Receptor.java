@@ -34,16 +34,18 @@ public class Receptor implements Runnable {
                 try {
                     JsonObject jsonObject = JsonParser.parseString(cadenaJson).getAsJsonObject();
 
-                    if (jsonObject.has("mensajeAEnviar")) {
-                    EventoCrearChatNuevo eventoOriginal = gson.fromJson(jsonObject, EventoCrearChatNuevo.class);
-
-                    bus.publicar(new EventoChatRecibidoLocal(eventoOriginal.getMensaje()));
+                    if (jsonObject.has("mensajeAEnviar")) { 
+                        EventoMensajeEnChat eventoOriginal = gson.fromJson(jsonObject, EventoMensajeEnChat.class);
                         
-                    } else if (jsonObject.has("chatNuevo")) {
-                        EventoCrearChatNuevo evento = gson.fromJson(jsonObject, EventoCrearChatNuevo.class);
-                        bus.publicar(evento);
+                        bus.publicar(new EventoMensajeRecibido(eventoOriginal));
                         
-                    } else if (jsonObject.has("usuarios")) {
+                    } 
+                    else if (jsonObject.has("chatNuevo")) { 
+                        EventoCrearChatNuevo eventoOriginal = gson.fromJson(jsonObject, EventoCrearChatNuevo.class);
+                        
+                        bus.publicar(new EventoChatRecibido(eventoOriginal));
+                        
+                    }else if (jsonObject.has("usuarios")) {
                         EventoEnviarUsuarios evento = gson.fromJson(jsonObject, EventoEnviarUsuarios.class);
                         bus.publicar(evento);
                         
@@ -73,10 +75,5 @@ public class Receptor implements Runnable {
         }
     }
     
-    public static class EventoChatRecibidoLocal {
-        private CrearChatNuevoDTO dto;
-        public EventoChatRecibidoLocal(CrearChatNuevoDTO dto) { this.dto = dto; }
-        public CrearChatNuevoDTO getDto() { return dto; }
-    }
 }
 

@@ -26,7 +26,6 @@ public class Negocio {
     private Set<Integer> usuariosActivos = new HashSet<>();
     private Usuario usuarioActual;
 
-    // VARIABLE NUEVA: Para saber a quién estamos intentando loguear en este cliente
     private String usuarioEsperandoRespuesta = null;
 
     public Negocio(IBusDeEventos bus) {
@@ -39,30 +38,42 @@ public class Negocio {
 
     private void configurarSuscripcionesDelBus() {
         bus.suscribir(evento -> {
-            if (evento instanceof EventoMensajeEnChat eventoMensajeEnChat) {
-                // ... lógica existente de mensajes ...
-                MensajeEnChatDTO dto = eventoMensajeEnChat.getMensaje();
-                for(Chat chat : memoriaChats){
-                    System.out.println(chat.toString());
-                    if(chat.getId() == dto.getChat().getId()){
-                        Mensaje mensajeN = new Mensaje(dto.getMensaje(), dto.getFechaMensaje(), dto.getUsuario());
-                        chat.getMensajes().add(mensajeN);
-                    }
-                }
-                notificarMensaje();
-            }
+            if (evento instanceof EventoMensajeRecibido eventoLocal) {
+                            // Desempaquetamos el evento real
+                            EventoMensajeEnChat eventoReal = eventoLocal.getEventoOriginal();
+                            MensajeEnChatDTO dto = eventoReal.getMensaje();
+
+                            // Tu lógica existente para guardar el mensaje en memoria...
+                            for (Chat c : memoriaChats) {
+                                if (c.getId() == dto.getChat().getId()) {
+                                     // Convertir DTO a Mensaje y guardar
+                                     // ...
+                                     break;
+                                }
+                            }
+                            notificarMensaje(); // Actualizar vista
+                        }
             else if (evento instanceof EventoCrearChatNuevo eventoCrearChatNuevo) {
-                // ... lógica existente de crear chat ...
                 CrearChatNuevoDTO dto = eventoCrearChatNuevo.getMensaje();
-                List<Mensaje> mVacio = new ArrayList<>();
-                List<Usuario> usuarios = new ArrayList<>();
-                for(Usuario u : memoriaUsuarios){
-                    if(u.getId() == dto.getUsuario1().getId() || u.getId() == dto.getUsuario2().getId())
-                        usuarios.add(u);
+                
+                if (this.usuarioActual != null && dto.getUsuario1().getId() == this.usuarioActual.getId()) {
+                        System.out.println("Negocio: Ignorando eco de chat creado por mí.");
+                        return; 
+                    }
+                if (this.usuarioActual != null && dto.getUsuario2().getId() == this.usuarioActual.getId()) {
+
+                        List<Usuario> participantes = new ArrayList<>();
+                        participantes.add(dto.getUsuario1());
+                        participantes.add(dto.getUsuario2());
+
+                        int nuevoId = this.memoriaChats.size() + 1; 
+
+                        Chat chatNuevo = new Chat(nuevoId, new ArrayList<>(), participantes);
+                        this.memoriaChats.add(chatNuevo);
+
+                        System.out.println("Negocio: Chat nuevo recibido y agregado.");
+                        notificarMensaje(); 
                 }
-                Chat chatNuevo = new Chat(memoriaChats.size()+1, mVacio, usuarios);
-                this.memoriaChats.add(chatNuevo);
-                notificarMensaje();
             }
             else if (evento instanceof EventoSincronizacion eventoSync) {
                 this.memoriaChats = eventoSync.getChats();
@@ -70,7 +81,6 @@ public class Negocio {
                 notificarMensaje(); 
             }
             else if (evento instanceof EventoEnviarUsuarios eventoEnviarUsuarios) { 
-                 // ... lógica existente de usuarios ...
                  List<UsuarioDTO> usuarios = eventoEnviarUsuarios.getUsuarios();
                  List<Usuario> usuariosAG = new ArrayList<>();
                  for(UsuarioDTO u : usuarios){
@@ -92,9 +102,8 @@ public class Negocio {
         });
     }
 
-    // --- LÓGICA DEL SERVIDOR (Procesar la petición) ---
     private void procesarLogin(EventoLogIn evento) {
-        LoginPedidoDTO request = evento.getEvento(); // Asegúrate que sea getLoginPedidoDTO() o getEvento() según tu clase
+        LoginPedidoDTO request = evento.getEvento(); 
         Usuario usuarioEncontrado = null;
 
         for (Usuario u : memoriaUsuarios) {
@@ -106,15 +115,12 @@ public class Negocio {
         }
 
         if (usuarioEncontrado == null) {
-            // CAMBIO IMPORTANTE: Incluso si falla, enviamos un UsuarioDTO dummy con el nombre
-            // para que el cliente sepa que SU intento falló.
             UsuarioDTO usuarioDummy = new UsuarioDTO(0, request.getUsuario(), "");
             bus.publicar(new EventoRespuestaLogin(new LoginRespuestaDTO(false, "Usuario o contraseña incorrectos", usuarioDummy)));
             return;
         }
 
         if (usuariosActivos.contains(usuarioEncontrado.getId())) {
-            // CAMBIO IMPORTANTE: Enviamos el usuario para identificación
             UsuarioDTO usuarioDummy = new UsuarioDTO(usuarioEncontrado.getId(), usuarioEncontrado.getUsuario(), "");
             bus.publicar(new EventoRespuestaLogin(new LoginRespuestaDTO(false, "El usuario ya tiene una sesión activa.", usuarioDummy)));
         } else {
@@ -127,7 +133,6 @@ public class Negocio {
         }
     }
 
-    // --- LÓGICA DEL CLIENTE (Procesar la respuesta) ---
     private void procesarRespuestaLogin(EventoRespuestaLogin evento) {
         LoginRespuestaDTO respuesta = evento.getEvento();
         
@@ -136,26 +141,18 @@ public class Negocio {
             String nombreUsuarioRespuesta = respuesta.getUsuarioLogueado().getNombre();
             
             if (nombreUsuarioRespuesta.equals(this.usuarioEsperandoRespuesta)) {
-                // ¡Es para mí!
                 
                 if (respuesta.isExito()) {
-                    // Actualizo mi usuario actual
                     UsuarioDTO uDTO = respuesta.getUsuarioLogueado();
                     this.usuarioActual = new Usuario(uDTO.getId(), uDTO.getNombre(), uDTO.getPassword());
                     
-                    // Ya no espero más respuestas
                     this.usuarioEsperandoRespuesta = null; 
                 } else {
-                    // Falló, pero era para mí. 
-                    // No limpio usuarioEsperandoRespuesta inmediatamente si quiero permitir reintentos 
-                    // o lo limpio y obligo a dar click de nuevo. Lo limpiamos por seguridad:
                     this.usuarioEsperandoRespuesta = null;
                 }
 
-                // Notificar a la Vista (Controlador/Modelo)
                 notificarLogin(respuesta);
             } 
-            // Si no coinciden los nombres, ignoramos el evento (era para otro cliente)
         }
     }
 
@@ -167,7 +164,6 @@ public class Negocio {
         }
     }
 
-    // --- MÉTODOS PÚBLICOS ---
 
     public void enviarMensaje(MensajeEnChatDTO dto) {
         bus.publicar(new EventoMensajeEnChat(dto));
@@ -178,7 +174,6 @@ public class Negocio {
     }
     
     public void validarLogin(LoginPedidoDTO dto){
-        // CAMBIO: Antes de enviar, registramos a quién estamos esperando
         this.usuarioEsperandoRespuesta = dto.getUsuario();
         bus.publicar(new EventoLogIn(dto));
     }
@@ -187,7 +182,6 @@ public class Negocio {
         this.listeners.add(listener);
     }
 
-    // --- NOTIFICADORES ---
 
     private void notificarMensaje() {
         for (INegocioListener listener : listeners) {

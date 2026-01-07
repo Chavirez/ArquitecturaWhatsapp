@@ -13,8 +13,6 @@ import java.util.List;
 import servidor.EstadoServidor;
 import servidor.Servidor;
 
-// ... imports ...
-
 public class MainServidor {
 
     public static void main(String[] args) {
@@ -24,17 +22,14 @@ public class MainServidor {
             EstadoServidor estado = EstadoServidor.getInstancia();
             System.out.println("Iniciando servidor...");
 
-            // SUSCRIPCIÓN SEGURA
             bus.suscribir(evento -> {
-                try { // <--- TRY-CATCH DENTRO DEL EVENTO
+                try { 
                     
                     if (evento instanceof EventoMensajeEnChat e) {
-                        // ... tu lógica de mensajes ...
                         MensajeEnChatDTO dto = e.getMensaje();
                         for (Chat c : estado.getChats()) {
                             if (c.getId() == dto.getChat().getId()) {
                                  c.getMensajes().add(new Mensaje(dto.getMensaje(), dto.getFechaMensaje(), dto.getUsuario()));
-                                 // IMPORTANTE: Imprimir para confirmar que se guarda
                                  System.out.println("SRV: Mensaje guardado en Chat " + c.getId()); 
                                  break;
                             }
