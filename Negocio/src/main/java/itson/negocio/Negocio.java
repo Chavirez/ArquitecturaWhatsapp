@@ -37,67 +37,75 @@ public class Negocio {
     }
 
     private void configurarSuscripcionesDelBus() {
-        bus.suscribir(evento -> {
+            bus.suscribir(evento -> {
+            
+            // 1. RECIBIR MENSAJE (Viene "disfrazado" del Receptor Cliente)
             if (evento instanceof EventoMensajeRecibido eventoLocal) {
-                            // Desempaquetamos el evento real
-                            EventoMensajeEnChat eventoReal = eventoLocal.getEventoOriginal();
-                            MensajeEnChatDTO dto = eventoReal.getMensaje();
-
-                            // Tu lógica existente para guardar el mensaje en memoria...
-                            for (Chat c : memoriaChats) {
-                                if (c.getId() == dto.getChat().getId()) {
-                                     // Convertir DTO a Mensaje y guardar
-                                     // ...
-                                     break;
-                                }
-                            }
-                            notificarMensaje(); // Actualizar vista
-                        }
-            else if (evento instanceof EventoCrearChatNuevo eventoCrearChatNuevo) {
-                CrearChatNuevoDTO dto = eventoCrearChatNuevo.getMensaje();
+                EventoMensajeEnChat eventoReal = eventoLocal.getEventoOriginal();
+                MensajeEnChatDTO dto = eventoReal.getMensaje();
                 
-                if (this.usuarioActual != null && dto.getUsuario1().getId() == this.usuarioActual.getId()) {
-                        System.out.println("Negocio: Ignorando eco de chat creado por mí.");
-                        return; 
+                // Buscar chat y agregar mensaje
+                for (Chat c : memoriaChats) {
+                    if (c.getId() == dto.getChat().getId()) {
+                         c.getMensajes().add(new Mensaje(dto.getMensaje(), dto.getFechaMensaje(), dto.getUsuario()));
+                         break;
                     }
-                if (this.usuarioActual != null && dto.getUsuario2().getId() == this.usuarioActual.getId()) {
+                }
+                notificarMensaje();
+            }
 
-                        List<Usuario> participantes = new ArrayList<>();
-                        participantes.add(dto.getUsuario1());
-                        participantes.add(dto.getUsuario2());
+            // 2. RECIBIR CHAT NUEVO (Viene "disfrazado" del Receptor Cliente)
+            else if (evento instanceof EventoChatRecibido eventoLocal) {
+                EventoCrearChatNuevo eventoReal = eventoLocal.getEventoOriginal();
+                CrearChatNuevoDTO dto = eventoReal.getMensaje();
+                
+                // Reconstruir chat y agregar a memoria
+                // (Tu lógica de agregar chat va aquí...)
+                List<Usuario> parts = new ArrayList<>();
+                parts.add(new Usuario(dto.getUsuario1().getId(), dto.getUsuario1().getUsuario(), ""));
+                parts.add(new Usuario(dto.getUsuario2().getId(), dto.getUsuario2().getUsuario(), ""));
+                
+                // Usamos ID temporal o el que venga
+                Chat nuevo = new Chat(memoriaChats.size() + 1, new ArrayList<>(), parts);
+                memoriaChats.add(nuevo);
+                
+                notificarMensaje();
+            }
 
-                        int nuevoId = this.memoriaChats.size() + 1; 
+            // 3. RESPUESTA LOGIN
+            else if (evento instanceof EventoRespuestaLogin eventoResp) {
+                if(eventoResp.getEvento().isExito()){
+                    UsuarioDTO uDto = eventoResp.getEvento().getUsuarioLogueado();
+                    this.usuarioActual = new Usuario(uDto.getId(), uDto.getNombre(), "");
+                }
+                notificarLogin(eventoResp.getEvento());
+            }
 
-                        Chat chatNuevo = new Chat(nuevoId, new ArrayList<>(), participantes);
-                        this.memoriaChats.add(chatNuevo);
-
-                        System.out.println("Negocio: Chat nuevo recibido y agregado.");
-                        notificarMensaje(); 
+            // 4. SINCRONIZACIÓN DE CHATS (¡RECUPERADO!)
+            else if (evento instanceof EventoSincronizacion eventoSync) {
+                if (eventoSync.getChats() != null) {
+                    this.memoriaChats = eventoSync.getChats(); // Actualiza la lista local
+                    System.out.println("Negocio: Chats sincronizados (" + memoriaChats.size() + ")");
+                    notificarMensaje(); // Actualiza la vista
                 }
             }
-            else if (evento instanceof EventoSincronizacion eventoSync) {
-                this.memoriaChats = eventoSync.getChats();
-                System.out.println("Negocio: Chats sincronizados (" + memoriaChats.size() + ")");
-                notificarMensaje(); 
-            }
-            else if (evento instanceof EventoEnviarUsuarios eventoEnviarUsuarios) { 
-                 List<UsuarioDTO> usuarios = eventoEnviarUsuarios.getUsuarios();
-                 List<Usuario> usuariosAG = new ArrayList<>();
-                 for(UsuarioDTO u : usuarios){
-                     Usuario uN = new Usuario(u.getId(), u.getNombre(), u.getPassword());
-                     usuariosAG.add(uN);
-                 }
-                 this.memoriaUsuarios = usuariosAG;
-                 notificarUsuarios();
-            }
-            else if (evento instanceof EventoLogIn eventoLogIn) {
-                procesarLogin(eventoLogIn);
-            }
-            else if (evento instanceof EventoRespuestaLogin eventoRespuesta) {
-                procesarRespuestaLogin(eventoRespuesta);
-            }
-            else if (evento instanceof EventoCerrarSesion eventoCerrarSesion) {
-                procesarCierreSesion(eventoCerrarSesion);
+
+            // 5. SINCRONIZACIÓN DE USUARIOS (¡RECUPERADO!)
+            else if (evento instanceof EventoEnviarUsuarios eventoUsers) {
+                if (eventoUsers.getUsuarios() != null) {
+                    
+                    List<Usuario> usuariosM = new ArrayList<>();
+                    
+                    for(UsuarioDTO u : eventoUsers.getUsuarios()){
+                    
+                        usuariosM.add(new Usuario(u.getId(), u.getNombre(), u.getPassword()));
+                    
+                    }
+                    
+                    this.memoriaUsuarios = usuariosM;
+                    System.out.println("Negocio: Usuarios sincronizados (" + memoriaUsuarios.size() + ")");
+                    // Si tienes una vista de "Agregar Contacto", notifícala aquí
+                }
             }
         });
     }

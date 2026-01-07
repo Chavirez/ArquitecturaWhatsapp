@@ -1,7 +1,5 @@
 package receptor;
 
-import DTOs.CrearChatNuevoDTO;
-import Eventos.*;
 import Interfaz.IBusDeEventos;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,15 +10,28 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import utilidades.LocalDateTimeAdapter;
 
+// Imports de Eventos
+import Eventos.EventoMensajeEnChat;
+import Eventos.EventoCrearChatNuevo;
+import Eventos.EventoLogIn;
+import Eventos.EventoRespuestaLogin;
+import Eventos.EventoSincronizacion;
+import Eventos.EventoEnviarUsuarios;
+import Eventos.EventoCerrarSesion;
+import Eventos.EventoMensajeRecibido; // Import de Dominio
+import Eventos.EventoChatRecibido;    // Import de Dominio
+
 public class Receptor implements Runnable {
 
     private final BufferedReader lector;
     private final IBusDeEventos bus;
     private final Gson gson;
+    private final boolean esCliente; // Bandera vital
 
-    public Receptor(BufferedReader lector, IBusDeEventos bus) {
+    public Receptor(BufferedReader lector, IBusDeEventos bus, boolean esCliente) {
         this.lector = lector;
         this.bus = bus;
+        this.esCliente = esCliente;
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
@@ -34,46 +45,59 @@ public class Receptor implements Runnable {
                 try {
                     JsonObject jsonObject = JsonParser.parseString(cadenaJson).getAsJsonObject();
 
-                    if (jsonObject.has("mensajeAEnviar")) { 
-                        EventoMensajeEnChat eventoOriginal = gson.fromJson(jsonObject, EventoMensajeEnChat.class);
-                        
-                        bus.publicar(new EventoMensajeRecibido(eventoOriginal));
+                    // 1. MENSAJES DE CHAT
+                    if (jsonObject.has("mensajeAEnviar")) {
+                        EventoMensajeEnChat evento = gson.fromJson(jsonObject, EventoMensajeEnChat.class);
+                        // Lógica de "Disfraz" solo para Cliente
+                        if (esCliente) bus.publicar(new EventoMensajeRecibido(evento));
+                        else bus.publicar(evento);
                         
                     } 
-                    else if (jsonObject.has("chatNuevo")) { 
-                        EventoCrearChatNuevo eventoOriginal = gson.fromJson(jsonObject, EventoCrearChatNuevo.class);
+                    // 2. CHAT NUEVO
+                    else if (jsonObject.has("chatNuevo")) {
+                        EventoCrearChatNuevo evento = gson.fromJson(jsonObject, EventoCrearChatNuevo.class);
+                        // Lógica de "Disfraz" solo para Cliente
+                        if (esCliente) bus.publicar(new EventoChatRecibido(evento));
+                        else bus.publicar(evento);
                         
-                        bus.publicar(new EventoChatRecibido(eventoOriginal));
-                        
-                    }else if (jsonObject.has("usuarios")) {
-                        EventoEnviarUsuarios evento = gson.fromJson(jsonObject, EventoEnviarUsuarios.class);
-                        bus.publicar(evento);
-                        
-                    } else if (jsonObject.has("chats")) { 
+                    } 
+                    // 3. SINCRONIZACIÓN DE CHATS (Mocks y guardados) -> ¡ESTO FALTABA!
+                    else if (jsonObject.has("chats")) { 
                         EventoSincronizacion evento = gson.fromJson(jsonObject, EventoSincronizacion.class);
                         bus.publicar(evento);
                         
-                    } else if (jsonObject.has("loginPedidoDTO")) {
+                    } 
+                    // 4. SINCRONIZACIÓN DE USUARIOS -> ¡ESTO FALTABA!
+                    else if (jsonObject.has("usuarios")) {
+                        EventoEnviarUsuarios evento = gson.fromJson(jsonObject, EventoEnviarUsuarios.class);
+                        bus.publicar(evento);
+                        
+                    } 
+                    // 5. LOGIN (Pedido)
+                    else if (jsonObject.has("loginPedidoDTO")) {
                         EventoLogIn evento = gson.fromJson(jsonObject, EventoLogIn.class);
                         bus.publicar(evento);
                         
-                    } else if (jsonObject.has("loginRespuestaDTO")) {
+                    } 
+                    // 6. LOGIN (Respuesta)
+                    else if (jsonObject.has("loginRespuestaDTO")) {
                         EventoRespuestaLogin evento = gson.fromJson(jsonObject, EventoRespuestaLogin.class);
                         bus.publicar(evento);
                         
-                    } else if (jsonObject.has("idUsuario")) {
+                    } 
+                    // 7. CERRAR SESIÓN
+                    else if (jsonObject.has("idUsuario")) {
                         EventoCerrarSesion evento = gson.fromJson(jsonObject, EventoCerrarSesion.class);
                         bus.publicar(evento);
                     } 
 
                 } catch (Exception e) {
-                    System.err.println("[RECEPTOR] Error: " + e.getMessage());
+                    System.err.println("[Receptor] Error procesando JSON: " + e.getMessage());
+                    // e.printStackTrace(); // Descomenta para depurar si hace falta
                 }
             }
         } catch (IOException e) {
-            System.err.println("[RECEPTOR] Desconexión.");
+            System.err.println("[Receptor] Conexión cerrada.");
         }
     }
-    
 }
-

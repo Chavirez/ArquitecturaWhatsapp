@@ -38,8 +38,10 @@ public class ManejadorCliente implements Runnable {
             sincronizarEstadoActual();
             
             Emisor emisor = new Emisor(escritor, bus, false);
-            Receptor receptor = new Receptor(lector, bus);
-
+            
+            // CAMBIO AQUÍ: Pasamos 'false'
+            Receptor receptor = new Receptor(lector, bus, false);
+            
             Thread hiloEmisor = new Thread(emisor);
             Thread hiloReceptor = new Thread(receptor);
             
