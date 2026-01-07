@@ -44,22 +44,29 @@ public class Emisor implements IEmisor, Runnable {
                 return; 
                                 }
                 if (this.esCliente) {
+                    // Filtro Cliente (ya lo tienes bien)
                     if (evento instanceof EventoSincronizacion || 
-                        evento instanceof EventoEnviarUsuarios ) {
+                        evento instanceof EventoEnviarUsuarios || 
+                        evento instanceof EventoRespuestaLogin) {
                         return; 
                     }
-                }
-                if (!this.esCliente) { 
-                        if (evento instanceof EventoRespuestaLogin e) {
-                            if (e.getIdSolicitante() != null && !e.getIdSolicitante().equals(this.idCliente)) {
-                                return; 
-                            }
+                } else {
+                    // Lógica SERVIDOR
+                    
+                    // a) No reenviar el pedido de login (Eco fix)
+                    if (evento instanceof EventoLogIn) {
+                        return; 
+                    }
+                    
+                    // b) NUEVO: Filtrar Respuesta de Login por ID
+                    if (evento instanceof EventoRespuestaLogin e) {
+                        // Si el evento tiene ID y NO es el mío, lo bloqueo.
+                        if (e.getIdSolicitante() != null && !e.getIdSolicitante().equals(this.idCliente)) {
+                            return; // No es para este cliente, no enviar.
                         }
                     }
-                else {
-                if (evento instanceof EventoLogIn) {
-                    return; 
-                }   }
+                }
+                
                 String datoSerializado = gson.toJson(evento);
                 try {
                     this.enviar(datoSerializado); 
