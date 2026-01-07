@@ -30,8 +30,10 @@ public class Receptor implements Runnable {
     public void run() {
         try {
             String cadenaJson;
+            
             while ((cadenaJson = lector.readLine()) != null) {
                 try {
+                    System.out.println(cadenaJson);
                     // 1. Convertir a JsonObject genérico
                     JsonObject jsonObject = JsonParser.parseString(cadenaJson).getAsJsonObject();
 

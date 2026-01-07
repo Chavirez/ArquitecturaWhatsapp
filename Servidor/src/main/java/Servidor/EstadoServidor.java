@@ -1,3 +1,4 @@
+/* Archivo: Servidor/src/main/java/itson/servidor/EstadoServidor.java */
 package Servidor;
 
 import Objetos.Chat;
@@ -5,17 +6,22 @@ import Objetos.Mensaje;
 import Objetos.Usuario;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EstadoServidor {
     
     private static EstadoServidor instancia;
     private List<Chat> chats;
     private List<Usuario> usuarios;
+    // NUEVO: Lista de IDs de usuarios actualmente conectados
+    private Set<Integer> usuariosConectados;
 
     private EstadoServidor() {
         this.chats = Collections.synchronizedList(new ArrayList<>());
         this.usuarios = Collections.synchronizedList(new ArrayList<>());
+        this.usuariosConectados = Collections.synchronizedSet(new HashSet<>());
         
         generarMocks();
     }
@@ -26,6 +32,26 @@ public class EstadoServidor {
         }
         return instancia;
     }
+    
+    // --- MÉTODOS DE GESTIÓN DE SESIÓN ---
+    
+    public synchronized boolean intentarConectar(int idUsuario) {
+        if (usuariosConectados.contains(idUsuario)) {
+            return false; // Ya está conectado
+        }
+        usuariosConectados.add(idUsuario);
+        return true; // Conexión exitosa
+    }
+
+    public synchronized void desconectar(int idUsuario) {
+        usuariosConectados.remove(idUsuario);
+        System.out.println("EstadoServidor: Usuario " + idUsuario + " desconectado.");
+    }
+
+    public boolean estaConectado(int idUsuario) {
+        return usuariosConectados.contains(idUsuario);
+    }
+
 
     private void generarMocks() {
         Usuario u1 = new Usuario(1, "Santiago", "1234");
@@ -48,34 +74,20 @@ public class EstadoServidor {
         crearChatMock(6, u3, u4);
         crearChatMock(7, u1, u5);
         crearChatMock(8, u2, u5);
-
-        System.out.println("EstadoServidor: Mocks generados. Usuarios: " + usuarios.size() + ", Chats: " + chats.size());
+        
     }
-
+    
     private void crearChatMock(int idChat, Usuario u1, Usuario u2) {
-        List<Usuario> participantes = new ArrayList<>();
+         List<Usuario> participantes = new ArrayList<>();
         participantes.add(u1);
         participantes.add(u2);
-        
         List<Mensaje> mensajesVacios = new ArrayList<>();
-        
         Chat chat = new Chat(idChat, mensajesVacios, participantes);
         this.chats.add(chat);
     }
 
-    public List<Chat> getChats() {
-        return chats;
-    }
-
-    public List<Usuario> getUsuarios() {
-        return usuarios;
-    }
-
-    public void agregarChat(Chat chat) {
-        this.chats.add(chat);
-    }
-
-    public void agregarUsuario(Usuario usuario) {
-        this.usuarios.add(usuario);
-    }
+    public List<Chat> getChats() { return chats; }
+    public List<Usuario> getUsuarios() { return usuarios; }
+    public void agregarChat(Chat chat) { this.chats.add(chat); }
+    public void agregarUsuario(Usuario usuario) { this.usuarios.add(usuario); }
 }

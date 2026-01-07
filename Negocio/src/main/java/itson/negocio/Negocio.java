@@ -1,174 +1,70 @@
+/* Archivo: Negocio/src/main/java/itson/negocio/Negocio.java */
 package itson.negocio;
 
-import DTOs.CrearChatNuevoDTO;
-import DTOs.LoginPedidoDTO;
-import DTOs.LoginRespuestaDTO;
-import DTOs.MensajeEnChatDTO;
-import DTOs.UsuarioDTO;
+import DTOs.*;
 import Eventos.*;
 import Interfaz.IBusDeEventos;
-import Objetos.Chat;
-import Objetos.Mensaje;
-import Objetos.Usuario;
+import Objetos.*;
 import interfaz.INegocioListener;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Negocio {
     
     private IBusDeEventos bus;
     private List<INegocioListener> listeners;
-    
     public List<Chat> memoriaChats; 
-    private List<Usuario> memoriaUsuarios;  
-    private Set<Integer> usuariosActivos = new HashSet<>();
     private Usuario usuarioActual;
-
-    // VARIABLE NUEVA: Para saber a quién estamos intentando loguear en este cliente
+    
     private String usuarioEsperandoRespuesta = null;
 
     public Negocio(IBusDeEventos bus) {
         this.bus = bus;
         this.listeners = new ArrayList<>();
         this.memoriaChats = new ArrayList<>();
-        this.memoriaUsuarios = new ArrayList<>();
         configurarSuscripcionesDelBus();
     }
 
     private void configurarSuscripcionesDelBus() {
         bus.suscribir(evento -> {
-            if (evento instanceof EventoMensajeEnChat eventoMensajeEnChat) {
-                // ... lógica existente de mensajes ...
-                MensajeEnChatDTO dto = eventoMensajeEnChat.getMensaje();
+            if (evento instanceof EventoRespuestaLogin eventoRespuesta) {
+                procesarRespuestaLogin(eventoRespuesta);
+            }
+            else if (evento instanceof EventoSincronizacion eventoSync) {
+                this.memoriaChats = eventoSync.getChats();
+                notificarMensaje(); 
+            }
+            else if (evento instanceof EventoMensajeEnChat eventoMensaje) {
+                MensajeEnChatDTO dto = eventoMensaje.getMensaje();
                 for(Chat chat : memoriaChats){
-                    System.out.println(chat.toString());
                     if(chat.getId() == dto.getChat().getId()){
-                        Mensaje mensajeN = new Mensaje(dto.getMensaje(), dto.getFechaMensaje(), dto.getUsuario());
-                        chat.getMensajes().add(mensajeN);
+                        chat.getMensajes().add(new Mensaje(dto.getMensaje(), dto.getFechaMensaje(), dto.getUsuario()));
                     }
                 }
                 notificarMensaje();
             }
-            else if (evento instanceof EventoCrearChatNuevo eventoCrearChatNuevo) {
-                // ... lógica existente de crear chat ...
-                CrearChatNuevoDTO dto = eventoCrearChatNuevo.getMensaje();
-                List<Mensaje> mVacio = new ArrayList<>();
-                List<Usuario> usuarios = new ArrayList<>();
-                for(Usuario u : memoriaUsuarios){
-                    if(u.getId() == dto.getUsuario1().getId() || u.getId() == dto.getUsuario2().getId())
-                        usuarios.add(u);
+            else if (evento instanceof EventoEnviarUsuarios eventoUsuarios) {
+                List<Usuario> listaConvertida = new ArrayList<>();
+                for(UsuarioDTO dto : eventoUsuarios.getUsuarios()){
+                    listaConvertida.add(new Usuario(dto.getId(), dto.getNombre(), ""));
                 }
-                Chat chatNuevo = new Chat(memoriaChats.size()+1, mVacio, usuarios);
-                this.memoriaChats.add(chatNuevo);
-                notificarMensaje();
-            }
-            else if (evento instanceof EventoSincronizacion eventoSync) {
-                this.memoriaChats = eventoSync.getChats();
-                System.out.println("Negocio: Chats sincronizados (" + memoriaChats.size() + ")");
-                notificarMensaje(); 
-            }
-            else if (evento instanceof EventoEnviarUsuarios eventoEnviarUsuarios) { 
-                 // ... lógica existente de usuarios ...
-                 List<UsuarioDTO> usuarios = eventoEnviarUsuarios.getUsuarios();
-                 System.out.println(usuarios.toString());
-                 List<Usuario> usuariosAG = new ArrayList<>();
-                 for(UsuarioDTO u : usuarios){
-                     Usuario uN = new Usuario(u.getId(), u.getNombre(), u.getPassword());
-                     usuariosAG.add(uN);
-                 }
-                 this.memoriaUsuarios = usuariosAG;
-                 notificarUsuarios();
-            }
-            else if (evento instanceof EventoLogIn eventoLogIn) {
-                procesarLogin(eventoLogIn);
-            }
-            else if (evento instanceof EventoRespuestaLogin eventoRespuesta) {
-                procesarRespuestaLogin(eventoRespuesta);
-            }
-            else if (evento instanceof EventoCerrarSesion eventoCerrarSesion) {
-                procesarCierreSesion(eventoCerrarSesion);
+                notificarUsuarios(listaConvertida);
             }
         });
     }
 
-    // --- LÓGICA DEL SERVIDOR (Procesar la petición) ---
-    private void procesarLogin(EventoLogIn evento) {
-        LoginPedidoDTO request = evento.getEvento(); // Asegúrate que sea getLoginPedidoDTO() o getEvento() según tu clase
-        Usuario usuarioEncontrado = null;
 
-        for (Usuario u : memoriaUsuarios) {
-            if (u.getUsuario().equals(request.getUsuario()) && 
-                u.getContrasenia().equals(request.getPassword())) {
-                usuarioEncontrado = u;
-                break;
-            }
-        }
-
-        if (usuarioEncontrado == null) {
-            // CAMBIO IMPORTANTE: Incluso si falla, enviamos un UsuarioDTO dummy con el nombre
-            // para que el cliente sepa que SU intento falló.
-            UsuarioDTO usuarioDummy = new UsuarioDTO(0, request.getUsuario(), "");
-            bus.publicar(new EventoRespuestaLogin(new LoginRespuestaDTO(false, "Usuario o contraseña incorrectos", usuarioDummy)));
-            return;
-        }
-
-        if (usuariosActivos.contains(usuarioEncontrado.getId())) {
-            // CAMBIO IMPORTANTE: Enviamos el usuario para identificación
-            UsuarioDTO usuarioDummy = new UsuarioDTO(usuarioEncontrado.getId(), usuarioEncontrado.getUsuario(), "");
-            bus.publicar(new EventoRespuestaLogin(new LoginRespuestaDTO(false, "El usuario ya tiene una sesión activa.", usuarioDummy)));
-        } else {
-            usuariosActivos.add(usuarioEncontrado.getId());
-            
-            UsuarioDTO uDto = new UsuarioDTO(usuarioEncontrado.getId(), usuarioEncontrado.getUsuario(), "");
-            bus.publicar(new EventoRespuestaLogin(new LoginRespuestaDTO(true, "Login exitoso", uDto)));
-            
-            System.out.println("Negocio: Usuario " + uDto.getNombre() + " ha iniciado sesión.");
+    public void validarLogin(LoginPedidoDTO dto){
+        this.usuarioEsperandoRespuesta = dto.getUsuario();
+        bus.publicar(new EventoLogIn(dto));
+    }
+    
+    public void cerrarSesion() {
+        if (usuarioActual != null) {
+            bus.publicar(new EventoCerrarSesion(usuarioActual.getId()));
+            this.usuarioActual = null;
         }
     }
-
-    // --- LÓGICA DEL CLIENTE (Procesar la respuesta) ---
-    private void procesarRespuestaLogin(EventoRespuestaLogin evento) {
-        LoginRespuestaDTO respuesta = evento.getEvento();
-        
-        if (this.usuarioEsperandoRespuesta != null && respuesta.getUsuarioLogueado() != null) {
-            
-            String nombreUsuarioRespuesta = respuesta.getUsuarioLogueado().getNombre();
-            
-            if (nombreUsuarioRespuesta.equals(this.usuarioEsperandoRespuesta)) {
-                // ¡Es para mí!
-                
-                if (respuesta.isExito()) {
-                    // Actualizo mi usuario actual
-                    UsuarioDTO uDTO = respuesta.getUsuarioLogueado();
-                    this.usuarioActual = new Usuario(uDTO.getId(), uDTO.getNombre(), uDTO.getPassword());
-                    
-                    // Ya no espero más respuestas
-                    this.usuarioEsperandoRespuesta = null; 
-                } else {
-                    // Falló, pero era para mí. 
-                    // No limpio usuarioEsperandoRespuesta inmediatamente si quiero permitir reintentos 
-                    // o lo limpio y obligo a dar click de nuevo. Lo limpiamos por seguridad:
-                    this.usuarioEsperandoRespuesta = null;
-                }
-
-                // Notificar a la Vista (Controlador/Modelo)
-                notificarLogin(respuesta);
-            } 
-            // Si no coinciden los nombres, ignoramos el evento (era para otro cliente)
-        }
-    }
-
-    private void procesarCierreSesion(EventoCerrarSesion evento) {
-        int idUsuario = evento.getIdUsuarioACerrar();
-        if (usuariosActivos.contains(idUsuario)) {
-            usuariosActivos.remove(idUsuario);
-            System.out.println("Negocio: Usuario ID " + idUsuario + " cerró sesión. Disponible para login.");
-        }
-    }
-
-    // --- MÉTODOS PÚBLICOS ---
 
     public void enviarMensaje(MensajeEnChatDTO dto) {
         bus.publicar(new EventoMensajeEnChat(dto));
@@ -178,34 +74,36 @@ public class Negocio {
         bus.publicar(new EventoCrearChatNuevo(dto));
     }
     
-    public void validarLogin(LoginPedidoDTO dto){
-        // CAMBIO: Antes de enviar, registramos a quién estamos esperando
-        this.usuarioEsperandoRespuesta = dto.getUsuario();
-        bus.publicar(new EventoLogIn(dto));
-    }
-
     public void agregarListener(INegocioListener listener) {
         this.listeners.add(listener);
     }
 
-    // --- NOTIFICADORES ---
+
+    private void procesarRespuestaLogin(EventoRespuestaLogin evento) {
+        LoginRespuestaDTO respuesta = evento.getEvento();
+        
+        if (this.usuarioEsperandoRespuesta != null && 
+            respuesta.getUsuarioLogueado() != null &&
+            respuesta.getUsuarioLogueado().getNombre().equals(this.usuarioEsperandoRespuesta)) {
+            
+            if (respuesta.isExito()) {
+                UsuarioDTO uDTO = respuesta.getUsuarioLogueado();
+                this.usuarioActual = new Usuario(uDTO.getId(), uDTO.getNombre(), uDTO.getPassword());
+                this.usuarioEsperandoRespuesta = null; 
+            } else {
+                this.usuarioEsperandoRespuesta = null;
+            }
+            notificarLogin(respuesta);
+        }
+    }
 
     private void notificarMensaje() {
-        for (INegocioListener listener : listeners) {
-            System.out.println(memoriaChats);
-            listener.recibirChat(memoriaChats);
-        }
+        for (INegocioListener l : listeners) l.recibirChat(memoriaChats);
     }
-    
-    private void notificarUsuarios() {
-        for (INegocioListener listener : listeners) {
-            listener.recibirUsuarios(memoriaUsuarios);
-        }
+    private void notificarUsuarios(List<Usuario> usuarios) {
+        for (INegocioListener l : listeners) l.recibirUsuarios(usuarios);
     }
-    
     private void notificarLogin(LoginRespuestaDTO dto) {
-        for (INegocioListener listener : listeners) {
-            listener.recibirLogin(dto);
-        }
+        for (INegocioListener l : listeners) l.recibirLogin(dto);
     }
 }

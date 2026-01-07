@@ -27,7 +27,7 @@ public class Emisor implements IEmisor, Runnable {
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                     .create();
         
-        bus.getInstancia().suscribir(evento -> {
+        this.bus.getInstancia().suscribir(evento -> {
 
 
                         String datoSerializado = gson.toJson(evento);
