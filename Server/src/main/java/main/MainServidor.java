@@ -1,4 +1,4 @@
-package ensamblador;
+package main;
 
 import DTOs.CrearChatNuevoDTO;
 import DTOs.MensajeEnChatDTO;
