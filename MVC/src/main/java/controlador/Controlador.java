@@ -24,6 +24,7 @@ import vista.FramePrincipal;
 public class Controlador {
     
     private Modelo modelo;
+    private FrameLogIn frm;
 
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
@@ -33,6 +34,7 @@ public class Controlador {
     
         FrameLogIn frm = new FrameLogIn(this);
         
+        this.frm = frm;
         modelo.agregarListenerLogin(frm);
         
         frm.setVisible(true);
@@ -41,12 +43,14 @@ public class Controlador {
     
     public void abrirFramePrincipal(){
     
+        
+        
         FramePrincipal frm = new FramePrincipal(this);
         
         modelo.agregarListenerChat(frm);
         
         frm.setVisible(true);
-        
+        this.frm.dispose();
         modelo.notificarChat();
 
     }

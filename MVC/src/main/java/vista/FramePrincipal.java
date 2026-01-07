@@ -10,21 +10,16 @@ import Objetos.Usuario;
 import controlador.Controlador;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.UIManager;
 import modelo.Modelo;
 import observadores.ObservadorChat;
 
-/**
- *
- * @author santi
- */
+
 public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat{
     
     private Controlador controlador;
@@ -35,15 +30,13 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     private javax.swing.JPanel contenedorMensajes;
     private javax.swing.JPanel contenedorContactos;
     
-    /**
-     * Creates new form FramePrincipal
-     */
+
     public FramePrincipal(Controlador controlador) {
         this.controlador = controlador;
         initComponents();
         configurarChat();
         configurarContactos();
-        
+        panelEnviarMensaje.setVisible(false);
 
     }
     
@@ -53,7 +46,11 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
         this.modelo = modelo;
         this.usuarioLogueado = modelo.getUsuarioLocal();
         actualizarListaChats(modelo.getChat());
-        cargarMensajesDelChat(modelo.getChatSeleccionado());
+        
+        if(modelo.getChatSeleccionado()!=null)
+            cargarMensajesDelChat(modelo.getChatSeleccionado());
+
+        
         this.revalidate();
         this.repaint();
         
@@ -62,7 +59,9 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     private void cargarMensajesDelChat(Chat chat) {
         this.chatSeleccionadoActual = chat;
 
+        actualizarListaChats(modelo.getChat());
         controlador.seleccionarChat(chat);
+        panelEnviarMensaje.setVisible(true);
         
         contenedorMensajes.removeAll();
 
@@ -127,6 +126,8 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
 
         int miId = (usuarioLogueado != null) ? usuarioLogueado.getId() : -1;
 
+        Chat chatSeleccionadoEnModelo = (this.modelo != null) ? this.modelo.getChatSeleccionado() : null;
+
         for (Chat chat : listaChats) {
             boolean soyParteDelChat = false;
             for (Usuario u : chat.getUsuarios()) {
@@ -135,10 +136,15 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
                     break;
                 }
             }
-
             if (!soyParteDelChat) continue; 
 
             PanelChatsDisponibles itemChat = new PanelChatsDisponibles(chat, controlador, this::cargarMensajesDelChat, usuarioLogueado);
+
+            if (chatSeleccionadoEnModelo != null && chat.getId() == chatSeleccionadoEnModelo.getId()) {
+                itemChat.setSeleccionado(true); 
+            } else {
+                itemChat.setSeleccionado(false); 
+            }
 
             itemChat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70)); 
             itemChat.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -204,29 +210,44 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblAgregarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblAgregarMouseClicked
-    List<Usuario> usuarios = controlador.getUsuariosDisponiblesParaChat();
-    
-    
-    if (usuarios.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "No hay más usuarios");
-        return;
-    }
-    
-    Usuario[] opciones = new Usuario[usuarios.size()];
-    usuarios.toArray(opciones);
-    
-    Usuario seleccionado = (Usuario) JOptionPane.showInputDialog(
-            this,
-            "Selecciona con quien hablar!",
-            "Nuevo Chat",
-            JOptionPane.QUESTION_MESSAGE,
-            null,
-            opciones,
-            opciones[0]);
+        List<Usuario> usuarios = controlador.getUsuariosDisponiblesParaChat();
 
-    if (seleccionado != null) {
-        controlador.crearChatCon(seleccionado);
-    }
+
+        if (usuarios.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay más usuarios");
+            return;
+        }
+
+        String[] opciones = new String[usuarios.size()];
+        for (int i = 0; i < usuarios.size(); i++) {
+            opciones[i] = usuarios.get(i).getUsuario();
+        }
+
+        String nombreSeleccionado = (String) JOptionPane.showInputDialog(
+                this,
+                "Selecciona con quien hablar!",
+                "Nuevo Chat",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                opciones, 
+                opciones.length > 0 ? opciones[0] : null);
+
+        if (nombreSeleccionado != null) {
+            int indexSeleccionado = -1;
+            for (int i = 0; i < opciones.length; i++) {
+                if (opciones[i].equals(nombreSeleccionado)) {
+                    indexSeleccionado = i;
+                    break;
+                }
+            }
+
+        if (indexSeleccionado != -1) {
+            Usuario usuarioReal = usuarios.get(indexSeleccionado);
+            controlador.crearChatCon(usuarioReal);
+        }
+        
+        }
+
     }//GEN-LAST:event_lblAgregarMouseClicked
 
  
