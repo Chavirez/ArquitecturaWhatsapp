@@ -14,6 +14,7 @@ public class MainServidor {
 
 public static void main(String[] args) {
         try {
+            BusDeEventos bus = new BusDeEventos();
             int puerto = 4444;
 
             EstadoServidor estado = EstadoServidor.getInstancia();
