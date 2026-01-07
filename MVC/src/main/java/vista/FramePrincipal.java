@@ -127,17 +127,14 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
 
         if(listaChats == null || listaChats.isEmpty()){
             System.out.println("No hay chats para mostrar");
-            // Refrescamos para que se limpie la pantalla si no hay chats
             contenedorContactos.revalidate();
             contenedorContactos.repaint();
             return;
         }
 
-        // Obtenemos el ID del usuario local una sola vez para optimizar
         int miId = (usuarioLogueado != null) ? usuarioLogueado.getId() : -1;
 
         for (Chat chat : listaChats) {
-            // Validación: Solo mostrar chats donde estoy yo
             boolean soyParteDelChat = false;
             for (Usuario u : chat.getUsuarios()) {
                 if (u.getId() == miId) {
@@ -148,9 +145,6 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
 
             if (!soyParteDelChat) continue; 
 
-            // --- CAMBIO CLAVE AQUÍ ---
-            // Pasamos el chat, el usuario, Y LA ACCIÓN (this::cargarMensajesDelChat)
-            // Nota: Asegúrate que PanelChatsDisponibles tenga este constructor
             PanelChatsDisponibles itemChat = new PanelChatsDisponibles(chat, controlador, this::cargarMensajesDelChat, usuarioLogueado);
 
             itemChat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70)); 

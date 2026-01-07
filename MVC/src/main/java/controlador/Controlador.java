@@ -59,10 +59,8 @@ public class Controlador {
         // Creamos el DTO con los dos IDs
         CrearChatNuevoDTO dto = new CrearChatNuevoDTO(modelo.getUsuarioLocal(), usuarioDestino);
 
-        // Publicamos el evento al bus (que viajará al servidor)
-//        bus.publicar(new EventoCrearChatNuevo(dto));
+        modelo.crearChat(dto);
 
-        System.out.println("Solicitando chat con: " + usuarioDestino.getUsuario());
     }
     
     public void intentarLogin(String usuario, String pass) {

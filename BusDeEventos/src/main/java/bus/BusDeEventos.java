@@ -1,32 +1,35 @@
 package bus;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 import Interfaz.IBusDeEventos;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList; // <--- IMPORTANTE
+import java.util.function.Consumer;
 
-public class BusDeEventos implements IBusDeEventos{
-    private static BusDeEventos instancia;
-    private final List<Consumer<Object>> suscriptores = new ArrayList<>();
+public class BusDeEventos implements IBusDeEventos {
+    
+    // Usamos CopyOnWriteArrayList para que sea seguro usarlo con hilos (Thread-Safe)
+    private List<Consumer<Object>> suscriptores;
 
-    public BusDeEventos() {}
-
-    @Override
-    public BusDeEventos getInstancia() {
-        if (instancia == null) instancia = new BusDeEventos();
-        return instancia;
+    public BusDeEventos() {
+        this.suscriptores = new CopyOnWriteArrayList<>(); // <--- CAMBIO AQUÍ
     }
 
     @Override
-    public void suscribir(Consumer<Object> suscriptor) {
-        suscriptores.add(suscriptor);
+    public void suscribir(Consumer<Object> subscriber) {
+        this.suscriptores.add(subscriber);
     }
 
     @Override
     public void publicar(Object evento) {
-        // Notificación en tiempo real 
-        for (Consumer s : suscriptores) {
-            s.accept(evento);
+        for (Consumer<Object> subscriber : suscriptores) {
+            try {
+                subscriber.accept(evento);
+            } catch (Exception e) {
+                // Si un suscriptor falla, lo reportamos pero NO rompemos el bucle
+                System.err.println("Error en un suscriptor del Bus: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }
+    

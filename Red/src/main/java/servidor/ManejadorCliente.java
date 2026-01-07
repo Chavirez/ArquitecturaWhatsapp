@@ -37,7 +37,7 @@ public class ManejadorCliente implements Runnable {
 
             sincronizarEstadoActual();
             
-            Emisor emisor = new Emisor(escritor, bus);
+            Emisor emisor = new Emisor(escritor, bus, false);
             Receptor receptor = new Receptor(lector, bus);
 
             Thread hiloEmisor = new Thread(emisor);

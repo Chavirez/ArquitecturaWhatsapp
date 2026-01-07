@@ -1,5 +1,6 @@
 package modelo;
 
+import DTOs.CrearChatNuevoDTO;
 import DTOs.LoginPedidoDTO;
 import DTOs.LoginRespuestaDTO;
 import DTOs.MensajeEnChatDTO;
@@ -10,7 +11,9 @@ import interfaz.INegocioListener;
 import itson.negocio.Negocio;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import observadores.ObservadoChat;
 import observadores.ObservadoLogin;
@@ -112,18 +115,43 @@ public class Modelo implements INegocioListener, ObservadoLogin, ObservadoChat {
 
         notificarChat();
     }
-
-    public List<Usuario> getUsuariosDisponiblesParaChat() {
+    
+    public void crearChat(CrearChatNuevoDTO dto) {
+            negocio.crearChat(dto);
+        }
+    
+public List<Usuario> getUsuariosDisponiblesParaChat() {
         List<Usuario> disponibles = new ArrayList<>();
 
-        if (usuarios != null && usuarioLocal != null) {
-            for (Usuario u : usuarios) {
-                // Agregamos a todos MENOS a mi mismo
-                if (u.getId() != usuarioLocal.getId()) {
-                    disponibles.add(u);
+        if (usuarios == null || usuarioLocal == null || chats == null) {
+            return disponibles;
+        }
+
+        Set<Integer> idsOcupados = new HashSet<>();
+        
+        for (Chat c : chats) {
+            boolean estoyEnEsteChat = false;
+            int idDelOtro = -1;
+            
+            for (Usuario participante : c.getUsuarios()) {
+                if (participante.getId() == usuarioLocal.getId()) {
+                    estoyEnEsteChat = true;
+                } else {
+                    idDelOtro = participante.getId();
                 }
             }
+            
+            if (estoyEnEsteChat && idDelOtro != -1) {
+                idsOcupados.add(idDelOtro);
+            }
         }
+
+        for (Usuario u : usuarios) {
+            if (u.getId() != usuarioLocal.getId() && !idsOcupados.contains(u.getId())) {
+                disponibles.add(u);
+            }
+        }
+        
         return disponibles;
     }
     
