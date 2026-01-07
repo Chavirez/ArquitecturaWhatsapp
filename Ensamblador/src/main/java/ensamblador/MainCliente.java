@@ -36,8 +36,8 @@ public class MainCliente {
             PrintWriter escritor = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            Emisor emisor = new Emisor(escritor, bus, true);
-            Receptor receptor = new Receptor(lector, bus, true);
+            Emisor emisor = new Emisor(escritor, bus, true, null);
+            Receptor receptor = new Receptor(lector, bus, true, null);
 
             new Thread(emisor).start();
             new Thread(receptor).start();

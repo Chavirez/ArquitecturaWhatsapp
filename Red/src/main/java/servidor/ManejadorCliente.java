@@ -17,6 +17,7 @@ import Objetos.Chat;
 import Objetos.Usuario;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ManejadorCliente implements Runnable {
     private Socket socket;
@@ -36,11 +37,13 @@ public class ManejadorCliente implements Runnable {
             this.lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             sincronizarEstadoActual();
-            
-            Emisor emisor = new Emisor(escritor, bus, false);
+            String idConexion = UUID.randomUUID().toString();
+
+            // Pasamo
+            Emisor emisor = new Emisor(escritor, bus, false,idConexion);
             
             // CAMBIO AQUÍ: Pasamos 'false'
-            Receptor receptor = new Receptor(lector, bus, false);
+            Receptor receptor = new Receptor(lector, bus, false,idConexion);
             
             Thread hiloEmisor = new Thread(emisor);
             Thread hiloReceptor = new Thread(receptor);

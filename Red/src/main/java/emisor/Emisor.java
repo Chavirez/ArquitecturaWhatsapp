@@ -22,13 +22,15 @@ public class Emisor implements IEmisor, Runnable {
     private BlockingQueue<String> cola;
     private PrintWriter escritor; 
     private IBusDeEventos bus;
+    private final String idCliente;
     private boolean esCliente; 
     
-    public Emisor(PrintWriter escritor, IBusDeEventos bus, boolean esCliente) {
+    public Emisor(PrintWriter escritor, IBusDeEventos bus, boolean esCliente, String idCliente) {
         this.cola = new LinkedBlockingQueue<>();
         this.escritor = escritor;
         this.bus = bus;
         this.esCliente = esCliente;
+        this.idCliente = idCliente; 
         
         Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
@@ -43,11 +45,18 @@ public class Emisor implements IEmisor, Runnable {
                                 }
                 if (this.esCliente) {
                     if (evento instanceof EventoSincronizacion || 
-                        evento instanceof EventoEnviarUsuarios || 
-                        evento instanceof EventoRespuestaLogin) {
+                        evento instanceof EventoEnviarUsuarios ) {
                         return; 
                     }
-                }else {
+                }
+                if (!this.esCliente) { 
+                        if (evento instanceof EventoRespuestaLogin e) {
+                            if (e.getIdSolicitante() != null && !e.getIdSolicitante().equals(this.idCliente)) {
+                                return; 
+                            }
+                        }
+                    }
+                else {
                 if (evento instanceof EventoLogIn) {
                     return; 
                 }   }

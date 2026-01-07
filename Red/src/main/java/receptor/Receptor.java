@@ -26,12 +26,15 @@ public class Receptor implements Runnable {
     private final BufferedReader lector;
     private final IBusDeEventos bus;
     private final Gson gson;
-    private final boolean esCliente; // Bandera vital
+    private final boolean esCliente; 
+    private final String idCliente;
 
-    public Receptor(BufferedReader lector, IBusDeEventos bus, boolean esCliente) {
+    public Receptor(BufferedReader lector, IBusDeEventos bus, boolean esCliente, String idCliente) {
         this.lector = lector;
         this.bus = bus;
         this.esCliente = esCliente;
+        this.idCliente = idCliente;
+    
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
@@ -73,11 +76,14 @@ public class Receptor implements Runnable {
                         bus.publicar(evento);
                         
                     } 
-                    // 5. LOGIN (Pedido)
                     else if (jsonObject.has("loginPedidoDTO")) {
-                        EventoLogIn evento = gson.fromJson(jsonObject, EventoLogIn.class);
-                        bus.publicar(evento);
+                    EventoLogIn evento = gson.fromJson(jsonObject, EventoLogIn.class);
+                        System.out.println("a");
+                        if (!esCliente) {
+                            evento.setIdSolicitante(this.idCliente);
+                        }
                         
+                        bus.publicar(evento);
                     } 
                     // 6. LOGIN (Respuesta)
                     else if (jsonObject.has("loginRespuestaDTO")) {

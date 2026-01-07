@@ -74,7 +74,6 @@ public class MainServidor {
                         }
                         
                         if (u1 != null && u2 != null) {
-                             // ... crear y guardar chat ...
                              int nuevoId = estado.getChats().size() + 1;
                              Chat nuevoChat = new Chat(nuevoId, new ArrayList<>(), List.of(u1, u2));
                              estado.agregarChat(nuevoChat);
@@ -110,6 +109,7 @@ public class MainServidor {
 
                                     DTOs.UsuarioDTO uDTO = new DTOs.UsuarioDTO(usuarioLogueado.getId(), usuarioLogueado.getUsuario(), usuarioLogueado.getContrasenia());
                                     respuestaDTO = new DTOs.LoginRespuestaDTO(true, "Login Exitoso", uDTO);
+                                    
                                     System.out.println("SRV: Login exitoso para " + usuarioLogueado.getUsuario());
                                 }
                             } else {
@@ -117,7 +117,11 @@ public class MainServidor {
                                 respuestaDTO = new DTOs.LoginRespuestaDTO(false, "Credenciales incorrectas", null);
                                 System.out.println("SRV: Login fallido por credenciales.");
                             }
-                        bus.publicar(new Eventos.EventoRespuestaLogin(respuestaDTO));
+                        Eventos.EventoRespuestaLogin eventoRespuesta = new Eventos.EventoRespuestaLogin(respuestaDTO);
+        
+                        eventoRespuesta.setIdSolicitante(e.getIdSolicitante());
+
+                        bus.publicar(eventoRespuesta);    
                     }
                 } catch (Exception ex) {
                     System.err.println("Error procesando evento en MainServidor: " + ex.getMessage());
