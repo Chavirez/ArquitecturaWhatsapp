@@ -1,4 +1,4 @@
-package servidor;
+package Servidor;
 
 import Interfaz.IBusDeEventos;
 import java.io.IOException;

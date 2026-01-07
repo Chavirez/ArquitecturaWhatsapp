@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
@@ -190,7 +191,28 @@ public class FramePrincipal extends javax.swing.JFrame implements ObservadorChat
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void lblAgregarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblAgregarMouseClicked
-        
+//    List<Usuario> usuarios = controlador.getUsuariosDisponiblesParaChat();
+//    
+//    if (usuarios.isEmpty()) {
+//        JOptionPane.showMessageDialog(this, "No hay más usuarios");
+//        return;
+//    }
+//    
+//    Usuario[] opciones = new Usuario[usuarios.size()];
+//    usuarios.toArray(opciones);
+//    
+//    Usuario seleccionado = (Usuario) JOptionPane.showInputDialog(
+//            this,
+//            "Selecciona con quien hablar!",
+//            "Nuevo Chat",
+//            JOptionPane.QUESTION_MESSAGE,
+//            null,
+//            opciones,
+//            opciones[0]);
+//
+//    if (seleccionado != null) {
+//        controlador.crearChatCon(seleccionado);
+//    }
     }//GEN-LAST:event_lblAgregarMouseClicked
 
  

@@ -7,14 +7,13 @@ import Objetos.Mensaje;
 import bus.BusDeEventos;
 import java.util.ArrayList;
 import java.util.List;
-import servidor.EstadoServidor;
-import servidor.Servidor;
+import Servidor.EstadoServidor;
+import Servidor.Servidor;
 
 public class MainServidor {
 
 public static void main(String[] args) {
         try {
-            BusDeEventos bus = new BusDeEventos();
             int puerto = 4444;
 
             EstadoServidor estado = EstadoServidor.getInstancia();

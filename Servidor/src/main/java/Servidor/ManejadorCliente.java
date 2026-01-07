@@ -1,4 +1,4 @@
-package servidor;
+package Servidor;
 
 import Interfaz.IBusDeEventos;
 import com.google.gson.Gson;
@@ -8,7 +8,7 @@ import receptor.Receptor;
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import servidor.EstadoServidor;
+import Servidor.EstadoServidor;
 import utilidades.LocalDateTimeAdapter;
 import DTOs.UsuarioDTO;
 import Eventos.EventoEnviarUsuarios;
