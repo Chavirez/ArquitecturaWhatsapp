@@ -46,7 +46,29 @@ public class FrameLogIn extends javax.swing.JFrame implements ObservadorLogin{
     public void actualizar(LoginRespuestaDTO respuesta){
         
         this.respuesta = respuesta;
-        System.out.println("Sipasa");
+        
+        if(respuesta == null){
+        
+            JOptionPane.showMessageDialog(this, 
+            "Error al iniciar sesión", 
+            "Error", 
+            JOptionPane.ERROR_MESSAGE);
+            return;
+            
+        }
+        
+        if(!respuesta.isExito()){
+        
+            JOptionPane.showMessageDialog(this, 
+            respuesta.getMensaje(), 
+            "Advertencia", 
+            JOptionPane.WARNING_MESSAGE);
+            return;
+            
+        }
+        
+        controlador.abrirFramePrincipal();
+        this.dispose();
     }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -122,29 +144,9 @@ public class FrameLogIn extends javax.swing.JFrame implements ObservadorLogin{
         }
         
         controlador.intentarLogin(usuario, pass);
-        
-        if(respuesta == null){
-        
-            JOptionPane.showMessageDialog(this, 
-            "Error al iniciar sesión", 
-            "Error", 
-            JOptionPane.ERROR_MESSAGE);
-            return;
-            
-        }
-        
-        if(!respuesta.isExito()){
-        
-            JOptionPane.showMessageDialog(this, 
-            respuesta.getMensaje(), 
-            "Advertencia", 
-            JOptionPane.WARNING_MESSAGE);
-            return;
-            
-        }
-        
-        controlador.abrirFramePrincipal();
-        this.dispose();
+
+        JOptionPane.showMessageDialog(this, "Esperando respuesta del servidor...");
+
         
     }//GEN-LAST:event_lblBtnLogMouseClicked
 

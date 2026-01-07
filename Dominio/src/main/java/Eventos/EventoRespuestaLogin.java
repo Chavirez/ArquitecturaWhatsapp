@@ -12,21 +12,21 @@ import DTOs.LoginRespuestaDTO;
  */
 public class EventoRespuestaLogin {
     
-    private LoginRespuestaDTO evento;
+    private LoginRespuestaDTO loginRespuestaDTO;
 
     public EventoRespuestaLogin() {
     }
 
     public EventoRespuestaLogin(LoginRespuestaDTO evento) {
-        this.evento = evento;
+        this.loginRespuestaDTO = evento;
     }
 
     public LoginRespuestaDTO getEvento() {
-        return evento;
+        return loginRespuestaDTO;
     }
 
     public void setEvento(LoginRespuestaDTO evento) {
-        this.evento = evento;
+        this.loginRespuestaDTO = evento;
     }
     
     

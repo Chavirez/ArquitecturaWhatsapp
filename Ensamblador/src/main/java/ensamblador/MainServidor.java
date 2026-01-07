@@ -3,6 +3,7 @@ package ensamblador;
 import DTOs.CrearChatNuevoDTO;
 import DTOs.MensajeEnChatDTO;
 import Eventos.EventoCrearChatNuevo;
+import Eventos.EventoLogIn;
 import Eventos.EventoMensajeEnChat;
 import Objetos.Chat;
 import Objetos.Mensaje;
@@ -24,6 +25,8 @@ public class MainServidor {
 
             bus.suscribir(evento -> {
                 try { 
+                    
+                    System.out.println(evento.toString());
                     
                     if (evento instanceof EventoMensajeEnChat e) {
                         MensajeEnChatDTO dto = e.getMensaje();
@@ -78,7 +81,44 @@ public class MainServidor {
                              System.out.println("SRV: Chat creado " + nuevoId);
                         }
                     }
-                    
+                    else if (evento instanceof EventoLogIn e) {
+                        System.out.println("SRV: Solicitud de login recibida para: " + e.getEvento().getUsuario());
+
+                        DTOs.LoginPedidoDTO pedido = e.getEvento();
+                        boolean credencialesCorrectas = false;
+                        Objetos.Usuario usuarioLogueado = null;
+
+                    for (Objetos.Usuario u : estado.getUsuarios()) {
+                                if (u.getUsuario().equals(pedido.getUsuario()) && u.getContrasenia().equals(pedido.getPassword())) {
+                                    credencialesCorrectas = true;
+                                    usuarioLogueado = u;
+                                    break;
+                                }
+                            }
+
+                            DTOs.LoginRespuestaDTO respuestaDTO;
+
+                            if (credencialesCorrectas) {
+                                // 2. VERIFICAR SI YA ESTÁ CONECTADO
+                                if (estado.estaConectado(usuarioLogueado.getId())) {
+                                    // FALLO: Ya está conectado
+                                    respuestaDTO = new DTOs.LoginRespuestaDTO(false, "El usuario ya tiene una sesión activa", null);
+                                    System.out.println("SRV: Login rechazado. " + usuarioLogueado.getUsuario() + " ya estaba conectado.");
+                                } else {
+                                    // ÉXITO: Credenciales OK y no estaba conectado
+                                    estado.registrarConexion(usuarioLogueado.getId()); // <--- LO REGISTRAMOS
+
+                                    DTOs.UsuarioDTO uDTO = new DTOs.UsuarioDTO(usuarioLogueado.getId(), usuarioLogueado.getUsuario(), usuarioLogueado.getContrasenia());
+                                    respuestaDTO = new DTOs.LoginRespuestaDTO(true, "Login Exitoso", uDTO);
+                                    System.out.println("SRV: Login exitoso para " + usuarioLogueado.getUsuario());
+                                }
+                            } else {
+                                // FALLO: Credenciales incorrectas
+                                respuestaDTO = new DTOs.LoginRespuestaDTO(false, "Credenciales incorrectas", null);
+                                System.out.println("SRV: Login fallido por credenciales.");
+                            }
+                        bus.publicar(new Eventos.EventoRespuestaLogin(respuestaDTO));
+                    }
                 } catch (Exception ex) {
                     System.err.println("Error procesando evento en MainServidor: " + ex.getMessage());
                     ex.printStackTrace();

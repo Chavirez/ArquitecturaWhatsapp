@@ -6,18 +6,21 @@ import Objetos.Usuario;
 import java.time.LocalDateTime; // Importante para las fechas
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EstadoServidor {
     
     private static EstadoServidor instancia;
     private List<Chat> chats;
     private List<Usuario> usuarios;
+    private Set<Integer> usuariosOnline;
 
     private EstadoServidor() {
         this.chats = Collections.synchronizedList(new ArrayList<>());
         this.usuarios = Collections.synchronizedList(new ArrayList<>());
-        
+        this.usuariosOnline = Collections.synchronizedSet(new HashSet<>());
         generarMocks();
     }
 
@@ -87,6 +90,17 @@ public class EstadoServidor {
         crearChatMock(idChat, u1, u2, new ArrayList<>());
     }
 
+    public boolean estaConectado(int idUsuario) {
+            return usuariosOnline.contains(idUsuario);
+        }
+
+        public void registrarConexion(int idUsuario) {
+            usuariosOnline.add(idUsuario);
+        }
+
+        public void registrarDesconexion(int idUsuario) {
+            usuariosOnline.remove(idUsuario);
+        }
     public List<Chat> getChats() {
         return chats;
     }
