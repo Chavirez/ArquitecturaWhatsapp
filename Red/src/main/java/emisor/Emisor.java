@@ -1,5 +1,6 @@
 package emisor;
 
+import Eventos.EventoCerrarSesion;
 import Eventos.EventoChatRecibido;
 import Interfaz.IBusDeEventos;
 import com.google.gson.Gson;
@@ -13,6 +14,7 @@ import utilidades.LocalDateTimeAdapter;
 // Imports de eventos para filtrar
 import Eventos.EventoSincronizacion;
 import Eventos.EventoEnviarUsuarios;
+import Eventos.EventoLogIn;
 import Eventos.EventoMensajeRecibido;
 import Eventos.EventoRespuestaLogin;
 
@@ -28,13 +30,12 @@ public class Emisor implements IEmisor, Runnable {
         this.cola = new LinkedBlockingQueue<>();
         this.escritor = escritor;
         this.bus = bus;
-        this.esCliente = esCliente; // Guardamos quién soy
+        this.esCliente = esCliente; 
         
         Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                     .create();
         
-        // Usamos 'this.bus' directamente (sin getInstancia)
         this.bus.suscribir(evento -> {
             if (evento != null) {
                 
@@ -42,17 +43,17 @@ public class Emisor implements IEmisor, Runnable {
                     evento instanceof EventoChatRecibido) {
                 return; 
                                 }
-                // --- FILTRO ANTI-ECO ---
                 if (this.esCliente) {
-                    // Si soy Cliente, IGNORO los eventos que envía el servidor.
-                    // Solo debo enviar lo que genera mi Interfaz Gráfica.
                     if (evento instanceof EventoSincronizacion || 
                         evento instanceof EventoEnviarUsuarios || 
                         evento instanceof EventoRespuestaLogin) {
-                        return; // NO ENVIAR
+                        return; 
+                    }
+                }else { 
+                    if (evento instanceof EventoLogIn || evento instanceof EventoCerrarSesion) {
+                        return; 
                     }
                 }
-                // -----------------------
 
                 String datoSerializado = gson.toJson(evento);
                 try {

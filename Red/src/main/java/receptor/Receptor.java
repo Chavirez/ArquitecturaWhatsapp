@@ -74,7 +74,7 @@ public class Receptor implements Runnable {
                         
                     } 
                     // 5. LOGIN (Pedido)
-                    else if (jsonObject.has("loginPedidoDTO")) {
+                    else if (jsonObject.has("loginRespuestaDTO")) {
                         EventoLogIn evento = gson.fromJson(jsonObject, EventoLogIn.class);
                         bus.publicar(evento);
                         

@@ -3,6 +3,7 @@ package ensamblador;
 import DTOs.CrearChatNuevoDTO;
 import DTOs.MensajeEnChatDTO;
 import Eventos.EventoCrearChatNuevo;
+import Eventos.EventoLogIn;
 import Eventos.EventoMensajeEnChat;
 import Objetos.Chat;
 import Objetos.Mensaje;
@@ -78,7 +79,38 @@ public class MainServidor {
                              System.out.println("SRV: Chat creado " + nuevoId);
                         }
                     }
-                    
+                    else if (evento instanceof EventoLogIn) {
+                        EventoLogIn e = (EventoLogIn) evento;
+                        // Nota: Asegúrate de usar el getter correcto según el cambio del Paso 1
+                        // Si cambiaste la variable a loginPedidoDTO, usa getLoginPedidoDTO()
+                        DTOs.LoginPedidoDTO dto = e.getEvento(); // o getLoginPedidoDTO()
+
+                        System.out.println("SRV: Intento de login de " + dto.getUsuario());
+
+                        Usuario usuarioEncontrado = null;
+
+                        // Buscar en la lista de usuarios del EstadoServidor
+                        for (Usuario u : estado.getUsuarios()) {
+                            if (u.getUsuario().equals(dto.getUsuario()) && 
+                                u.getContrasenia().equals(dto.getPassword())) {
+                                usuarioEncontrado = u;
+                                break;
+                            }
+                        }
+
+                        DTOs.LoginRespuestaDTO respuesta;
+                        if (usuarioEncontrado != null) {
+                            DTOs.UsuarioDTO uDto = new DTOs.UsuarioDTO(
+                                usuarioEncontrado.getId(), 
+                                usuarioEncontrado.getUsuario(), 
+                                usuarioEncontrado.getContrasenia()
+                            );
+                            respuesta = new DTOs.LoginRespuestaDTO(true, "Login Exitoso", uDto);
+                            System.out.println("SRV: Login aceptado para " + usuarioEncontrado.getUsuario());
+                        } else {
+                            respuesta = new DTOs.LoginRespuestaDTO(false, "Credenciales incorrectas", null);
+                            System.out.println("SRV: Login rechazado.");
+                        }}
                 } catch (Exception ex) {
                     System.err.println("Error procesando evento en MainServidor: " + ex.getMessage());
                     ex.printStackTrace();
